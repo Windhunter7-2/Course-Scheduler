@@ -7,10 +7,14 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     jcenter()
 }
 
 dependencies {
+    implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'mysql:mysql-connector-java:8.0.19'
+    
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
