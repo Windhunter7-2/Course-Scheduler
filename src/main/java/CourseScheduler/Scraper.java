@@ -1,6 +1,7 @@
 package CourseScheduler;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 public class Scraper {
 	
@@ -19,6 +20,10 @@ public class Scraper {
 		
 		// TODO
 	}
-	
-	
+
+	public Date getLastRun() {
+		System.out.println(System.getProperty("user.dir").toString());
+		//Talk to Nathan about querying SQL if we're doing it that way.
+		return new Date(1992);
+	}
 }
