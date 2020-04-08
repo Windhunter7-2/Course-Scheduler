@@ -11,13 +11,13 @@ public class Profile {
     }
 
 
-    public int setnumCredits(int credits){
+    public int setNumCredits(int credits){
         int numcredits= credits;
         return numcredits;
     }
 
 
-    public int setnumSemesters(int semesters){
+    public int setNumSemesters(int semesters){
         int numSemesters= semesters;
         return numSemesters;
     }
