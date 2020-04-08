@@ -16,7 +16,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class CourseScheduler extends Application {// implements EventHandler<ActionEvent> {
+public class CourseScheduler extends Application {
 
     Stage stage;
     Scene scene;
@@ -26,29 +26,36 @@ public class CourseScheduler extends Application {// implements EventHandler<Act
 
     public void start(Stage primaryStage) throws Exception { //scraperGUI()
         try {
-            primaryStage.setTitle("Rescrape Data");
-            Text lastRunText = new Text("Data last updated on Nov 22, 1963");//scraper.getLastRun().toString());
-            lastRunText.setStyle("-fx-font-size:30");
-            scrapeButton = new Button("Scrape Now");
-            scrapeButton.setPrefSize(300, 80);
-            scrapeButton.setStyle("-fx-font-size:30");
-            GridPane gp = new GridPane();
-            gp.add(lastRunText, 0, 0);
-            gp.add(scrapeButton, 0, 1);
-            gp.setAlignment(Pos.CENTER);
-            gp.setVgap(200);
+            scraperGUI(primaryStage);
 
-            ColumnConstraints colCon = new ColumnConstraints();
-            colCon.setHalignment(HPos.CENTER);
-            gp.getColumnConstraints().add(colCon);
-
-            primaryStage.setMaximized(true);
-            Scene scene = new Scene(gp);
-            primaryStage.setScene(scene);
-            primaryStage.show();
         } catch(Exception e) {
             System.out.println(e.toString() + " in CourseScheduler.start()\n");
+
         }
+    }
+
+    public void scraperGUI(Stage stage) {
+        stage.setTitle("Rescrape Data");
+        Text lastRunText = new Text("Last updated on Nov 22, 1963");  //scraper.getLastRun().toString());
+        lastRunText.setStyle("-fx-font-size:30");
+        scrapeButton = new Button("Scrape Now");
+        scrapeButton.setPrefSize(300, 80);
+        scrapeButton.setStyle("-fx-font-size:30");
+        GridPane gp = new GridPane();
+        gp.add(lastRunText, 0, 0);
+        gp.add(scrapeButton, 0, 1);
+        gp.setAlignment(Pos.CENTER);
+        gp.setVgap(200);
+
+        ColumnConstraints colCon = new ColumnConstraints();
+        colCon.setHalignment(HPos.CENTER);
+        gp.getColumnConstraints().add(colCon);
+
+        stage.setMaximized(true);
+        Scene scene = new Scene(gp);
+
+        stage.setScene(scene);
+        stage.show();
     }
 
     public static void main(String[] args) throws Exception {
