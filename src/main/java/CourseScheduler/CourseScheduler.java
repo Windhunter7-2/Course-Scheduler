@@ -10,7 +10,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -30,6 +34,72 @@ public class CourseScheduler extends Application {
             //Basic Exception catch for now - will expand later.
             System.out.println(e.toString() + " in CourseScheduler.start()\n");
         }
+        try {
+            scraperGUI(primaryStage);
+        } catch(Exception e) {
+            //Basic Exception catch for now - will expand later.
+            System.out.println(e.toString() + " in CourseScheduler.start()\n");
+        }
+    }
+    public void profileGUI(Stage stage){
+        ArrayList<String> profilenames = new ArrayList<>();
+        profilenames.add("Akeem");
+        profilenames.add("Jack");
+        profilenames.add("Nathan");
+        profilenames.add("Evan");
+
+        StackPane pane = new StackPane();
+        ComboBox<String> selectprofile = new ComboBox();
+        // create a text input dialog
+        TextInputDialog td = new TextInputDialog();
+        // setHeaderText
+        td.setHeaderText("enter your profile name");
+        // create a event handler to create new profiles
+        EventHandler<ActionEvent> event = e -> {
+            // show the text input dialog
+
+            String value = (String) selectprofile.getValue();
+            //Creates a new profile when "create new profile" isselected from the combo box
+            if(value.equals("Create New Profile")) {
+                System.out.println(profilenames);
+                td.showAndWait();
+                //creates profile object from the Profile class
+                createProfile(td.getEditor().getText());
+                selectprofile.getItems().add(td.getEditor().getText());
+            }
+
+
+        };
+
+
+        selectprofile.getItems().add("Create New Profile");
+        //selectprofile.setOnAction(e->createnewprofile(selectprofile));
+        selectprofile.getItems().addAll(profilenames);
+        selectprofile.setOnAction(event);
+        selectprofile.setOnAction(e->loadProfile());
+
+        // primaryStage.setScene(new Scene(root, 300, 275));
+        pane.getChildren().addAll(selectprofile);
+        stage.setScene(new Scene(pane, 300, 275));
+        stage.show();
+
+
+    }
+
+    /**
+     * creates a new profile.
+     * @param name name of the user
+     */
+    public void createProfile(String name){
+        Profile newprofile = new Profile(name);
+        System.out.println("this is my profile name "+ newprofile.getName());
+    }
+    /**
+     * loads a profile from the database.
+     *
+     */
+    public void loadProfile(){
+
     }
 
     //Helper method to update the display of the time last run once scraping is complete.

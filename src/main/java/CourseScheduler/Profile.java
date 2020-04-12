@@ -25,6 +25,10 @@ public class Profile {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
     ProfileDB userprofiledb = new ProfileDB(db);
 
     /**
