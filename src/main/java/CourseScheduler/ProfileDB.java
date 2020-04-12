@@ -61,11 +61,10 @@ public class ProfileDB  {
 
 
     /**
-     * Creates the needed Courses necessary information in the database.
+     * Creates the profiles' necessary information in the database.
      */
     public void CreateProfileTable() throws SQLException {
-        Connection connection = profiledb.get();
-        Statement statement = connection.createStatement();
+
         statement.execute(TABLE_CREATE_PROFILES);
     }
     public void onUpgrade() throws SQLException {
@@ -73,20 +72,24 @@ public class ProfileDB  {
         statement.execute(query);
         profiledb.create();
     }
+
+    /**
+     * Creates the needed Courses necessary information in the database.
+     */
+    public void createGraddCourses() throws SQLException {
+        statement.execute(TABLE_CREATE_MY_GRAD_COURSES);
+    }
+    /**
+     * Creates the needed Courses necessary information in the database.
+     */
+    public void createNeededCourses() throws SQLException {
+        statement.execute(TABLE_CREATE_NEEDED_COURSES);
+    }
     /**
      * Creates the completed Courses necessary information in the database.
      */
     public void createCompletedCourses() throws SQLException {
-        String string = "CREATE TABLE IF NOT EXISTS Needed Courses (" +
-                "code TEXT PRIMARY KEY NOT NULL," + // compound identifier of name + number for convenience
-                "course name TEXT NOT NULL," + // eg 'Calc II'
-                "number INTEGER NOT NULL," + // eg '101'
-                "type TEXT NOT NULL," + // eg 'cs'
-                "credits INTEGER," + // number of credits
-                "description TEXT," + // full course description
-                "prereqs TEXT NOT NULL," + // pre-requisite codes stored in a comma separated list
-                "flag INTEGER" + // flags for the algorithm
-                ");";
+        statement.execute(TABLE_CREATE_DONE_COURSES);
     }
 
     public void insertProfile(String name){
