@@ -79,7 +79,7 @@ public class CourseScheduler extends Application {
         //selectprofile.setOnAction(e->createnewprofile(selectprofile));
         selectprofile.getItems().addAll(profilenames);
         selectprofile.setOnAction(event);
-        selectprofile.setOnAction(e->loadProfile());
+       // selectprofile.setOnAction(e->loadProfile());
 
         // primaryStage.setScene(new Scene(root, 300, 275));
         pane.getChildren().addAll(selectprofile);
