@@ -92,6 +92,7 @@ public class CourseScheduler extends Application {
      */
     public void createProfile(String name){
         Profile newprofile = new Profile(name);
+        newprofile.insertProfileDB();
         System.out.println("this is my profile name "+ newprofile.getName());
     }
     /**

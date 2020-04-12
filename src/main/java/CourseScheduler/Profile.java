@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Profile {
-    Database db;
+    private static int user_id=0;
     String name;
     int numcredits;
     int numsemesters;
+    public static ProfileDB user_profiles;
     ArrayList<String> neededCourses;
     ArrayList<String> doneCourses;
     public Profile(String Name){
          name = Name;
-         db= new Database(name);//users database
+
          numcredits=18;
          numsemesters=8;
+         user_id++;
     }
 
     /**
@@ -29,7 +31,9 @@ public class Profile {
         return name;
     }
 
-    ProfileDB userprofiledb = new ProfileDB(db);
+    public void insertProfileDB(){
+        user_profiles.insertProfile(name);
+    }
 
     /**
      * sets user's choice of credits
