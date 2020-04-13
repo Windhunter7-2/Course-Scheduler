@@ -26,6 +26,7 @@ public class CourseScheduler extends Application {
 
     Stage stage;
     Scene scene;
+    ArrayList<String> profilenames = new ArrayList<>();
     Button scrapeButton;
     Scraper scraper;
     final int GUIHEIGHT = 900, GUIWIDTH = 1100;
@@ -45,7 +46,7 @@ public class CourseScheduler extends Application {
         }
     }
     public void profileGUI(Stage stage){
-        ArrayList<String> profilenames = new ArrayList<>();
+        //ArrayList<String> profilenames = new ArrayList<>();
         profilenames.add("Akeem");
         profilenames.add("Jack");
         profilenames.add("Nathan");
@@ -70,7 +71,10 @@ public class CourseScheduler extends Application {
                 createProfile(td.getEditor().getText());
                 selectprofile.getItems().add(td.getEditor().getText());
             }
-
+            else{
+                loadProfile(value);
+                getProfileList();
+            }
 
         };
 
@@ -102,10 +106,16 @@ public class CourseScheduler extends Application {
      * loads a profile from the database.
      *
      */
-    public void loadProfile(){
+    public void loadProfile(String name){
 
     }
-
+    /**
+     * gets the list of profiles .
+     *
+     */
+    public ArrayList<String> getProfileList(){
+        return profilenames;
+    }
     //Helper method to update the display of the time last run once scraping is complete.
     private void updateTime(Label timeLabel, DateTimeFormatter dtf) {
         timeLabel.setText("Last updated on " + dtf.format(LocalDateTime.now())); //Change to scraper.getLastRun().toString()); once method is complete.
