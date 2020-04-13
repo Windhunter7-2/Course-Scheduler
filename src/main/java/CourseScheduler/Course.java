@@ -95,4 +95,19 @@ public class Course {
 		return this;
 	}
 	
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Course{");
+		sb.append("fullName='").append(fullName).append('\'');
+		sb.append(", name='").append(name).append('\'');
+		sb.append(", type='").append(type).append('\'');
+		sb.append(", credits=").append(credits);
+		sb.append(", desc='").append(desc).append('\'');
+		sb.append(", code='").append(code).append('\'');
+		sb.append(", prereqs=").append(prereqs);
+		sb.append(", coreqs=").append(coreqs);
+		sb.append(", flag=").append(flag);
+		sb.append('}');
+		return sb.toString();
+	}
 }
