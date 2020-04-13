@@ -64,7 +64,7 @@ public class Profile {
      * number of semesters.
      * @return number of semesters.
      */
-    public int getNumsemesters() {
+    public int getNumSemesters() {
         return numsemesters;
     }
 
@@ -73,7 +73,7 @@ public class Profile {
      * @param course course to add
      * @return list of needed courses.
      */
-    public ArrayList<String> addneededCourses(String course){
+    public ArrayList<String> addNeededCourses(String course){
         neededCourses.add(course);
         return neededCourses;
     }
@@ -82,7 +82,7 @@ public class Profile {
      * @param course course to add
      * @return list of done courses.
      */
-    public ArrayList<String> adddoneCourses(String course){
+    public ArrayList<String> addDoneCourses(String course){
         doneCourses.add(course);
         return doneCourses;
     }
