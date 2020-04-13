@@ -1,5 +1,6 @@
 package CourseScheduler;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -18,14 +19,8 @@ public class Database {
 	/**
 	 * Sets up the local filesystem before attempting to connect.
 	 */
-	private Path createPath() {
-		// Use the local %APPDATA% variable
-		String appdata = System.getenv("APPDATA");
-		// Create a path within under %APPDATA%/CourseScheduler/name.db
-		Path path = Paths.get(appdata, "CourseScheduler", name + ".db");
-		// Make sure the parent folder (%APPDATA%/CourseScheduler) exists
-		path.toFile().getParentFile().mkdir();
-		return path;
+	private Path createPath() throws IOException {
+		return LocalStorage.get(name + ".db").toPath();
 	}
 	
 	/**
@@ -34,7 +29,7 @@ public class Database {
 	 *
 	 * @throws SQLException If an error occurs while trying to create the database.
 	 */
-	public void create() throws SQLException {
+	public void create() throws SQLException, IOException {
 		Path path = createPath();
 		connection = DriverManager.getConnection("jdbc:sqlite:" + path.toString());
 	}
