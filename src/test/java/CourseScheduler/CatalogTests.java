@@ -2,6 +2,7 @@ package CourseScheduler;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class CatalogTests {
 	
 	@Test
-	public void creation() throws SQLException {
+	public void creation() throws SQLException, IOException {
 		// This test verifies that no exception is thrown when a Database is created and connected to.
 		Database db = new Database("test");
 		db.create();
