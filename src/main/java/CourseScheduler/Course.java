@@ -41,8 +41,12 @@ public class Course {
 	 * An internal representation of flags used to process the course in the algorithm
 	 */
 	int flag;
+	/**
+	 * A string representation of the parents, eg "(CS110 & MATH125) | MATHXYZ"
+	 */
+	final String parents;
 	
-	public Course(String fullName, String name, String type, int credits, String desc, String code, List<String> prereqs, List<String> coreqs, int flag) {
+	public Course(String fullName, String name, String type, int credits, String desc, String code, List<String> prereqs, List<String> coreqs, int flag, String parents) {
 		this.fullName = fullName;
 		this.name = name;
 		this.type = type;
@@ -52,6 +56,7 @@ public class Course {
 		this.prereqs = prereqs;
 		this.coreqs = coreqs;
 		this.flag = flag;
+		this.parents = parents;
 	}
 	
 	public String getFullName() {
@@ -93,6 +98,10 @@ public class Course {
 	public Course setFlag(int flag) {
 		this.flag = flag;
 		return this;
+	}
+	
+	public String getParents() {
+		return parents;
 	}
 	
 	@Override
