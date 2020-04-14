@@ -162,8 +162,6 @@ public class Scraper {
 		block = block.replaceAll("minimum score of .*?,", "");
 		
 		if (block.contains("or") || block.contains("and")) {
-			System.out.println("Handle or/and: " + block);
-			
 			char join = block.contains("or") ? '|' : '&';
 			block = block.replaceAll("and|or", "");
 			
@@ -204,7 +202,6 @@ public class Scraper {
 		} else {
 			// Hopefully just a single course.
 			block = block.trim().replaceAll("\\.$", "");
-			System.out.println("Handle single: " + block);
 			String type = block.split(" ")[0];
 			String numb = block.split(" ")[1];
 			

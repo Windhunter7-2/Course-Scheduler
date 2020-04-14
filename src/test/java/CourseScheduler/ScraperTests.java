@@ -2,13 +2,11 @@ package CourseScheduler;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
