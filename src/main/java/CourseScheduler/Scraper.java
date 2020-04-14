@@ -270,24 +270,4 @@ public class Scraper {
 		return new Date(1992);
 	}
 	
-	class ScrapedPrereq {
-		
-		String title;
-		List<String> conditions;
-		
-		public ScrapedPrereq(String title, List<String> conditions) {
-			this.title = title;
-			this.conditions = conditions;
-		}
-		
-		@Override
-		public String toString() {
-			final StringBuilder sb = new StringBuilder("ScrapedPrereq{");
-			sb.append("title='").append(title).append('\'');
-			sb.append(", conditions=").append(conditions);
-			sb.append('}');
-			return sb.toString();
-		}
-	}
-	
 }
