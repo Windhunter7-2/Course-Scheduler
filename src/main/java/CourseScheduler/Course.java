@@ -7,32 +7,32 @@ public class Course {
 	/**
 	 * The full name of the course, eg "Software Engineering"
 	 */
-	final String fullName;
+	public final String fullName;
 	/**
 	 * The shortened name of the course, eg "CS 321"
 	 */
-	final String name;
+	public final String name;
 	/**
 	 * The type of the course, eg "CS" or "MATH" etc
 	 */
-	final String type;
+	public final String type;
 	/**
 	 * The number of credits that this course is worth
 	 */
-	final int credits;
+	public final int credits;
 	/**
 	 * The description of the course from the catalog
 	 */
-	final String desc;
+	public final String desc;
 	/**
 	 * The informal code for the course, which combines the type and number, eg "CS321"
 	 */
-	final String code;
+	public final String code;
 	/**
 	 * A list of course codes that are immediate prerequisites for this course. This list might overlap
 	 * with some of the codes in coreqs.
 	 */
-	final List<String> prereqs;
+	public final List<String> prerequisites;
 	/**
 	 * A list of course codes that are required, but can be taken alongside this course
 	 */
@@ -40,7 +40,7 @@ public class Course {
 	/**
 	 * An internal representation of flags used to process the course in the algorithm
 	 */
-	int flag;
+	public int flag;
 	/**
 	 * A string representation of the parents, eg "(CS110 & MATH125) | MATHXYZ"
 	 */
@@ -53,7 +53,7 @@ public class Course {
 		this.credits = credits;
 		this.desc = desc;
 		this.code = code;
-		this.prereqs = prereqs;
+		this.prerequisites = prereqs;
 		this.coreqs = coreqs;
 		this.flag = flag;
 		this.parents = parents;
@@ -83,8 +83,8 @@ public class Course {
 		return code;
 	}
 	
-	public List<String> getPrereqs() {
-		return prereqs;
+	public List<String> getPrerequisites() {
+		return prerequisites;
 	}
 	
 	public List<String> getCoreqs() {
@@ -113,7 +113,7 @@ public class Course {
 		sb.append(", credits=").append(credits);
 		sb.append(", desc='").append(desc).append('\'');
 		sb.append(", code='").append(code).append('\'');
-		sb.append(", prereqs=").append(prereqs);
+		sb.append(", prereqs=").append(prerequisites);
 		sb.append(", coreqs=").append(coreqs);
 		sb.append(", flag=").append(flag);
 		sb.append('}');

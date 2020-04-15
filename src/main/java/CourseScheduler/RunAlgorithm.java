@@ -1,3 +1,5 @@
+package CourseScheduler;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -5,14 +7,14 @@ import java.util.List;
 public class RunAlgorithm {
 	
 	/**
-	 * This is the modified adjacency list of all the courses that the current Profile put as “needed” courses. The root
-	 * node, “Graduation”, is the first Course in the array. (Note that order doesn’t matter for the other Courses) The
-	 * “linked lists” of this modified adjacency list are the prerequisites listed in the Course node, for each Course.
+	 * This is the modified adjacency list of all the courses that the current Profile put as "needed" courses. The root
+	 * node, "Graduation", is the first Course in the array. (Note that order doesn’t matter for the other Courses) The
+	 * "linked lists" of this modified adjacency list are the prerequisites listed in the Course node, for each Course.
 	 */
-	private Course [] adjacencyList;
+	private Course[] adjacencyList;
 	
 	/**
-	 * This is the number of “levels” of prerequisites each Course in the modified adjacency list has. Note that the
+	 * This is the number of "levels" of prerequisites each Course in the modified adjacency list has. Note that the
 	 * indices match up exactly with the adjacency list indices.
 	 */
 	private int [] coursePrereqCounts;
@@ -456,7 +458,7 @@ public class RunAlgorithm {
 	
 	/**
 	 * This is the main portion of the algorithm. It does a depth-first traversal on the given Course, adds that Course to
-	 * orderedCourseList, and “removes” it from adjacencyList via lowering the “count” to below 1.
+	 * orderedCourseList, and "removes" it from adjacencyList via lowering the "count" to below 1.
 	 * @param recurseCourse The Course currently being recursively called for the method
 	 * @return null The return type was only for a failsafe/backdoor, it's not technically needed
 	 */
