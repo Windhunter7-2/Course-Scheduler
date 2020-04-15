@@ -1,5 +1,6 @@
 package CourseScheduler;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -79,7 +80,7 @@ public class ProfileDB  {
         Statement statement = connection.createStatement();
         statement.execute(TABLE_CREATE_PROFILES);
     }
-    public void onUpgrade() throws SQLException {
+    public void onUpgrade() throws SQLException, IOException {
         Statement statement = connection.createStatement();
         String query = "DROP TABLE IF EXIST" + TABLE_CREATE_PROFILES;
         statement.execute(query);

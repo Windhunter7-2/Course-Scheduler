@@ -52,8 +52,13 @@ public class CourseScheduler extends Application {
         profilenames.add("Nathan");
         profilenames.add("Evan");
 
-        StackPane pane = new StackPane();
+       // StackPane pane = new StackPane();
+        GridPane pane = new GridPane();
+
         ComboBox<String> selectprofile = new ComboBox();
+        Label welcomeLabel = new Label("Welcome To Course Scheduler");
+        Button btnContinue = new Button("Continue");
+        btnContinue.setOnAction(e->stage.setScene(new Scene(pane, 300, 275)));
         // create a text input dialog
         TextInputDialog td = new TextInputDialog();
         // setHeaderText
@@ -86,6 +91,14 @@ public class CourseScheduler extends Application {
        // selectprofile.setOnAction(e->loadProfile());
 
         // primaryStage.setScene(new Scene(root, 300, 275));
+        pane.setAlignment(Pos.CENTER);
+        pane.setHgap(10);
+       /* pane.prefHeight(50.0);
+        pane.prefWidth(50.0);*/
+        pane.setVgap(50);
+        pane.add(selectprofile, 0, 1);
+        pane.add(welcomeLabel, 0, 0);
+        pane.add(btnContinue, 1,1 );
         pane.getChildren().addAll(selectprofile);
         stage.setScene(new Scene(pane, 300, 275));
         stage.show();
