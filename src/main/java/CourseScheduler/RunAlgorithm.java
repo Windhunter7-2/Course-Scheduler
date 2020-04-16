@@ -12,41 +12,71 @@ public class RunAlgorithm {
 	 * "linked lists" of this modified adjacency list are the prerequisites listed in the Course node, for each Course.
 	 */
 	private Course[] adjacencyList;
-	
+
 	/**
 	 * This is the number of "levels" of prerequisites each Course in the modified adjacency list has. Note that the
 	 * indices match up exactly with the adjacency list indices.
 	 */
 	private int [] coursePrereqCounts;
-	
+
 	/**
 	 * This is simply the sum of coursePrereqCounts.
 	 */
 	private int totalCount;
-	
+
 	/**
 	 * This is the list of *ordered* Courses to be returned to the caller of runAlgorithm. getPrereq() adds the Courses
 	 * in the proper order to this array.
 	 */
 	private Course [] orderedCourseList;
-	
+
 	/**
 	 * This is the current total number of *non-null* Courses in orderedCourseList.
 	 */
 	private int orderedListCount;
-	
+
 	/**
 	 * This is a list of the Courses that are "deleted" *only* from the or flags. This is part of what's used in determining
 	 * which Courses should be skipped over in getPrereq() for the "Graduation" Course.
 	 */
 	private List<Course> removedCourses;
-	
+
 	/**
 	 * This is a temporary list of Courses that are "deleted" *only* from the or flags, and *only* involving the recursive
 	 * part. This is used to determine if the child of a parent should be removed or not when the parent is removed.
 	 */
 	private List<Course> tempRemovedCourses;
-	
+
+    /**
+     * Sets all the Courses from the given list as the Courses for every index after 0 in adjacencyList,
+     * as well as calls setPrereqCounts() to set the “level” counts for all those courses.
+     * It then adds a root “Graduation” Course at index 0, and for its prerequisites,
+     * gives all the other Courses in the adjacencyList. It also initializes orderedCourseList,
+     * to have the same number of slots as the length of List<Course>, and initializes those slots to null.
+     * In addition, it also initiates orderedListCount to start as 0.
+     * @param courseList The list of courses the user has indicated they want to take.
+     */
+	public void setNodesList(List<Course> courseList) {
+	    this.adjacencyList = new Course[courseList.size() + 1];
+	    ArrayList<String> gradPrereqs = new ArrayList<String>();
+	    for(int i = 0; i < courseList.size(); i++) {
+	    	gradPrereqs.add(courseList.get(i).getCode());
+		}
+	    Course graduation = new Course("Graduation", "Goal Completed", "GRAD",
+                120, "All requisite courses completed. Congratulations!", "GRAD-999",
+                gradPrereqs, new ArrayList<String>(), 1234567890, "Everything");
+	    this.adjacencyList[0] = graduation;
+	    for(int j = 1; j < courseList.size() + 1; j++) {
+	        this.adjacencyList[j] = courseList.get(j - 1);
+        }
+		this.setPrereqCounts();
+        orderedCourseList = new Course[courseList.size()];
+	    for(int k = 0; k < orderedCourseList.length; k++) {
+	        orderedCourseList[k] = null;
+        }
+	    orderedListCount = 0;
+    }
+
 	/**
 	 * This takes a flag and, if it's an or parent flag, returns *which* or parent flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
@@ -60,7 +90,7 @@ public class RunAlgorithm {
 		else
 			return -1;
 	}
-	
+
 	/**
 	 * This takes a flag and, if it's an or child flag, returns *which* or child flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
@@ -83,7 +113,7 @@ public class RunAlgorithm {
 		else
 			return -1;
 	}
-	
+
 	/**
 	 * This takes a flag and, if it's a corequisite flag, returns -1. Otherwise, it returns 1. (Or 0 for the 0 flag)
 	 * @param flag
@@ -100,7 +130,7 @@ public class RunAlgorithm {
 			newFlag = 1;
 		return newFlag;
 	}
-	
+
 	/**
 	 * This is a helper method for getPrereq() that specifically is for dealing with the various flags. (AKA for different
 	 * flags, this method is for the conditionals of the different flags, to return the Course most likely to be chosen,
@@ -120,7 +150,7 @@ public class RunAlgorithm {
 		Course childCourseB = null;
 		int childIndexA = -1;
 		int childIndexB = -1;
-		
+
 		//Convert Strings to Courses/Indices
 		for (int i = 0; i < adjacencyList.length; i++)
 		{
@@ -136,7 +166,7 @@ public class RunAlgorithm {
 				childIndexB = i;
 			}
 		}
-		
+
 		//Case for Handling "null"
 		if ( (childA.equals("null")) || (childCourseA == null) )
 		{
@@ -147,7 +177,7 @@ public class RunAlgorithm {
 		}
 		else if ( (childB.equals("null")) || (childCourseB == null) )
 			return childIndexA;
-		
+
 		//Corequisite Flag
 		if ( (parentFlag < -1) && (numPrereqs == 1) )
 		{
@@ -156,7 +186,7 @@ public class RunAlgorithm {
 			else
 				return childIndexB;
 		}
-		
+
 		//ALL Other Flags
 		int flagA = childCourseA.flag;
 		int flagB = childCourseB.flag;
@@ -197,7 +227,7 @@ public class RunAlgorithm {
 			else
 				returnedChildIndex = childIndexB;
 		}
-		
+
 		//Or Flag (Same for ALL Or Flags)
 		else if ( (Math.abs(parentFlag) == 1000) || (Math.abs(parentFlag) == 1010) )
 		{
@@ -214,7 +244,7 @@ public class RunAlgorithm {
 				else if (isParentFlagB == -1)
 					countA = -1;
 			}
-			
+
 			//Pick Left Child
 			if (countA < countB)
 			{
@@ -265,7 +295,7 @@ public class RunAlgorithm {
 					lowerCount(childIndexB, parentIndex);
 				}
 			}
-			
+
 			//Pick Right Child
 			else
 			{
@@ -317,11 +347,11 @@ public class RunAlgorithm {
 				}
 			}
 		}
-		
+
 		//Standard Return
 		return returnedChildIndex;
 	}
-	
+
 	/**
 	 * This is a helper method for getPrereq(). It lowers the count of the current Course.
 	 * @param indexOfChild The index of the Course to lower the count of
@@ -332,7 +362,7 @@ public class RunAlgorithm {
 		//For Errors
 		if (indexOfChild == -1)
 			return;
-		
+
 		//Recursive Lowering; indexOfParent = Actual
 		if (indexOfChild == indexOfParent)
 		{
@@ -368,15 +398,15 @@ public class RunAlgorithm {
 			}
 			return;
 		}
-		
+
 		//"Lower Count" (Actual Lowering Done in Main Part of getPrereq())
 		if ( !removedCourses.contains(adjacencyList[indexOfChild]) )
 			removedCourses.add(adjacencyList[indexOfChild]);
-		
+
 		//Special Alt Case for Graduation
 		if (indexOfParent == -1)
 			return;
-		
+
 		//Remove Child Course
 		Course parentCourse = adjacencyList[indexOfParent];
 		for (int i = 0; i < parentCourse.prerequisites.size(); i++)
@@ -386,7 +416,7 @@ public class RunAlgorithm {
 				parentCourse.prerequisites.remove(currentChild);
 		}
 	}
-	
+
 	/**
 	 * This is a helper method for getPrereq_flagHelper(). It checks if the parent flag needs to be changed, and if so, changes it.
 	 * @param indexOfParent The index of the parent Course
@@ -401,7 +431,7 @@ public class RunAlgorithm {
 		int isParentFlag = parentFlag(parentFlag);
 		int isChildFlag = -1;
 		int maxFlag = 0;
-		
+
 		//Find Any Flag of Same Type
 		for (int i = 0; i < parentCourse.prerequisites.size(); i++)
 		{
@@ -416,7 +446,7 @@ public class RunAlgorithm {
 					duplicateFlagFoundB = true;
 			}
 		}
-		
+
 		//No More Flags of the Type Exist
 		if (!duplicateFlagFoundB)
 		{
@@ -455,7 +485,7 @@ public class RunAlgorithm {
 			setFlag(parentCourse, maxFlag);
 		}
 	}
-	
+
 	/**
 	 * This is the main portion of the algorithm. It does a depth-first traversal on the given Course, adds that Course to
 	 * orderedCourseList, and "removes" it from adjacencyList via lowering the "count" to below 1.
@@ -497,7 +527,7 @@ public class RunAlgorithm {
 			//Return from Graduation Course so runAlgorithm() Can Run It Again
 			return null;
 		}
-		
+
 		//Set Variables
 		int parentIndex = courseToIndex(recursCourse.name);
 		int parentFlag = getFlag(recursCourse);
@@ -506,7 +536,7 @@ public class RunAlgorithm {
 		int indexChosen = -1;
 		int numPrereqs = recursCourse.prerequisites.size();
 		List<String> prereqs = recursCourse.prerequisites;
-		
+
 		//Alternate Base Case (Graduation Base Case)
 		if (prereqs.size() < 1)
 		{
@@ -522,7 +552,7 @@ public class RunAlgorithm {
 			lowerCount(parentIndex, -1);
 			return null;
 		}
-		
+
 		//Loop Through to Find Appropriate Course
 		childA = prereqs.get(0);
 		if (prereqs.size() > 1)
@@ -564,7 +594,7 @@ public class RunAlgorithm {
 			return null;
 		//Flag Check for Ors
 		flagCheck(parentIndex);
-		
+
 		//No Children Left; Base Case
 		List<String> childPrereqs = adjacencyList[indexChosen].prerequisites;
 		if ( childPrereqs.isEmpty() )
@@ -584,11 +614,11 @@ public class RunAlgorithm {
 				flagCheck(parentIndex);
 			return adjacencyList[indexChosen];
 		}
-		
+
 		//Children Left; Recursive Case
 		else if ( !childPrereqs.isEmpty() )
 			getPrereq(adjacencyList[indexChosen]);
-		
+
 		//Return Statement for Errors
 		return null;
 	}
