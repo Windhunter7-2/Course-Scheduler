@@ -5,13 +5,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,7 +32,31 @@ public class Scraper {
 	
 	public List<Course> run() throws SQLException, IOException {
 		catalog.create();
+		dump();
 		
+		List<String> catalogs = scrapeCatalogList();
+		System.out.println("Found " + catalogs.size() + " catalogs: " + catalogs);
+		
+		List<Course> courses = new ArrayList<Course>();
+		for (String s : catalogs) {
+			System.out.println("Scraping " + s);
+			courses.addAll(scrapeCourses(s));
+		}
+		
+		System.out.println("Found " + courses.size() + "courses");
+		
+		save(courses);
+		
+		return courses;
+	}
+	
+	/**
+	 * Scrapes the main courses endpoint for a list of all sub-catalogs.
+	 *
+	 * @return A list of absolute URLs to each subsequent catalog.
+	 * @throws IOException If something goes wrong scraping.
+	 */
+	private List<String> scrapeCatalogList() throws IOException {
 		Document doc = Jsoup.parse(new java.net.URL(URL), 3000);
 		
 		// This block of code gets links to all the catalogs
@@ -41,15 +67,7 @@ public class Scraper {
 			});
 		});
 		
-		System.out.println("Found " + catalogs.size() + " catalogs: " + catalogs);
-		
-		List<Course> courses = new ArrayList<Course>();
-		
-		for (String s : catalogs) {
-			courses.addAll(scrapeCourses(s));
-		}
-		
-		return courses;
+		return catalogs;
 	}
 	
 	/**
@@ -60,11 +78,6 @@ public class Scraper {
 	private List<Course> scrapeCourses(String link) throws IOException {
 		Document doc = Jsoup.parse(new java.net.URL(link), 3000);
 		return doc.select(".courseblock").stream().map(Scraper::scrapeCourse).collect(Collectors.toList());
-	}
-	
-	// For testing purposes only
-	static String parsePrereqs(String block) {
-		return parsePrereqs(block, new ArrayList<>(), new ArrayList<>());
 	}
 	
 	/**
@@ -86,134 +99,96 @@ public class Scraper {
 	static String parsePrereqs(String block, List<String> prereqs, List<String> coreqs) {
 		// Detect all conditions for minimum grades and preserve them for later removal.
 		Map<String, String> conditions = new HashMap<>();
-		Matcher matcher = Pattern.compile("([A-F][-+]?) Requires minimum grade of [A-F][-+]?").matcher(block);
+		Pattern pattern = Pattern.compile("([A-Z]+[-+]?) Requires minimum grade of [A-Z]+[-+]?\\.?");
+		Matcher matcher = Pattern.compile("([A-Z]+[-+]?) Requires minimum grade of [A-Z]+[-+]?\\.?").matcher(block);
 		while (matcher.find()) {
 			block = matcher.replaceFirst("");
 			conditions.put(matcher.group(1), matcher.group(0));
+			matcher = pattern.matcher(block);
 		}
+		
+		// Hardcode concurrent condition.
 		block = block.replace("* May be taken concurrently.", "");
 		conditions.put("*", "");
 		
-		// Break into parenthesis blocks first.
-		// This uses a typical stack algorithm to traverse each nested parenthesis group.
-		// It adds the starting position of each opening parenthesis and pops it off when the
-		// closing parenthesis is encountered.
-		List<String> groups = new ArrayList<>();
-		if (block.contains("(")) {
-			Stack<Integer> stack = new Stack<>();
-			
-			for (int i = 0; i < block.toCharArray().length; i++) {
-				char c = block.charAt(i);
-				switch (c) {
-					case '(':
-						stack.add(i);
-						break; // save start
-					case ')':
-						groups.add(block.substring(stack.pop() + 1, i));
-						break; // pop start and substring
-					default:
-						break;
-				}
-			}
-		} else {
-			groups.add(block);
-		}
+		// Also replace any test pre-requisites.
+		block = block.replaceAll("minimum score of \\d+ in '.*'", "");
 		
-		// Now "groups" is every parenthesis group in order from most nested to least nested.
-		// We should transform each group one by one and replace the result in every other string too.
-		for (int i = 0; i < groups.size(); i++) {
-			String group = groups.get(i);
-			String replace = parsePrereqs(group, conditions, prereqs, coreqs);
-			block = block.replace(group, replace);
-			
-			// Replace in all other groups as well.
-			for (int j = i; j < groups.size(); j++) {
-				groups.set(j, groups.get(j).replace(group, replace));
-			}
-		}
+		block = block.replaceAll("[.,]", "");
 		
-		// Cleanup of trailing characters/whitespace.
-		block = block.replaceAll("[.\\s]+$", "").replaceAll("^\\(([^()]+)\\)$", "$1").trim();
+		StringBuilder out = new StringBuilder();
 		
-		// Final pass to fix issues with mismanaged groups.
-		block = block.replaceAll(" and ", "&").replaceAll(" or ", "|");
+		// Detects course numbers, which sometimes include letters.
+		Pattern numberPattern = Pattern.compile("^[LU]?[0-9]{3}[LUT" + Pattern.quote(String.join("", conditions.keySet())) + "]?");
+		// Detects course names, like ACCT or CS.
+		Pattern classPattern = Pattern.compile("^[A-Z]{1,4}");
 		
-		return block;
-	}
-	
-	/**
-	 * Handles the parsing of a prerequisite block from the catalog.
-	 *
-	 * @param block The block of text to parse.
-	 * @param conditions A map of conditions that can apply to each course, like requiring a certain grade or
-	 * the ability to take the course concurrently.
-	 * @param prereqs A list that will be populated with the pre-requisites (and coreqs) of the course.
-	 * @param coreqs A list that will be populated with stricly the coreqs of the course.
-	 * @return A String representing the parental relationship of the course.
-	 */
-	private static String parsePrereqs(String block, Map<String, String> conditions, List<String> prereqs, List<String> coreqs) {
-		StringBuilder parents = new StringBuilder();
+		// Reusable matcher for course names
+		Matcher cm;
+		// Reusable matcher for course numbers
+		Matcher nm;
 		
-		// Strip trailing periods.
-		block = block.replaceAll("\\.$", "");
+		String type = "";
+		String join = "";
+		List<String> names = new ArrayList<>();
 		
-		// Strip all testing pre-reqs first
-		block = block.replaceAll("minimum score of .*?,", "");
+		// Pop classes on: or/and, close parenthesis, or string end
 		
-		if (block.contains("or") || block.contains("and")) {
-			char join = block.contains("or") ? '|' : '&';
-			block = block.replaceAll("and|or", "");
-			
-			// Grab the type of the first class, eg "MATH"
-			String[] split = block.split(" ");
-			String type = split[0];
-			List<String> numbers = new ArrayList<>();
-			
-			// Handle each additional number
-			for (int i = 1; i < split.length; i++) {
-				String numb = split[i];
-				if (numb.isBlank()) {
-					continue;
-				}
-				if (numb.startsWith("(")) {
-					numbers.add(numb);
-					continue;
-				}
-				
-				// Save all the conditions that were hit
-				List<String> conditionals = new ArrayList<>();
-				for (String c : numb.split("")) {
-					if (conditions.containsKey(c)) {
-						numb = numb.replace(c, "");
-						conditionals.add(c);
+		while (!block.isEmpty()) {
+			if (Character.isSpaceChar(block.charAt(0))) {
+				block = block.substring(1);
+			} else if (block.charAt(0) == '(' || block.charAt(0) == ')') {
+				if (!names.isEmpty()) {
+					if (names.size() == 1) {
+						out.append(names.get(0) + join); // for (A&(...)) blocks
+					} else {
+						out.append(String.join(join, names));
 					}
+					prereqs.addAll(names);
+					names.clear();
+					join = "";
+				} else if (!join.isEmpty()) {
+					out.append(join);
+					join = "";
+				}
+				out.append(block.charAt(0));
+				block = block.substring(1);
+			} else if (block.startsWith("or")) {
+				join = "|";
+				block = block.substring("or".length());
+			} else if (block.startsWith("and")) {
+				join = "&";
+				block = block.substring("and".length());
+			} else if ((nm = numberPattern.matcher(block)).find()) { // number encountered
+				String group = nm.group();
+				String name = type + "-" + group.replaceAll("[" + Pattern.quote(String.join("", conditions.keySet())) + "]$", "");
+				names.add(name);
+				
+				if (group.contains("*")) {
+					coreqs.add(name);
 				}
 				
-				if (conditionals.contains("*"))
-					coreqs.add(type + numb);
+				block = block.substring(group.length());
+			} else if ((cm = classPattern.matcher(block)).find()) { // class encountered
+				String found = cm.group();
+				block = block.substring(found.length());
 				
-				// Now we're handling numbers
-				numbers.add(type + numb);
-				prereqs.add(type + numb);
+				if (!conditions.containsKey(found)) {
+					type = cm.group();
+				}
+			} else {
+				//				System.out.println("> Skip: " + block.charAt(0));
+				block = block.substring(1);
 			}
-			
-			parents.append(numbers.stream().collect(Collectors.joining(join + "")));
-		} else {
-			// Hopefully just a single course.
-			block = block.trim().replaceAll("\\.$", "");
-			String type = block.split(" ")[0];
-			String numb = block.split(" ")[1];
-			
-			// Strip the condition codes
-			for (String key : conditions.keySet()) {
-				numb = numb.replaceAll(key + "$", "");
-			}
-			
-			parents.append(type);
-			parents.append(numb);
 		}
 		
-		return parents.toString();
+		if (!names.isEmpty()) {
+			out.append(String.join(join, names));
+			prereqs.addAll(names);
+			names.clear();
+		}
+		
+		return out.toString();
 	}
 	
 	/**
@@ -235,6 +210,8 @@ public class Scraper {
 		int credits = Integer.parseInt(elTitle.text().replaceAll(".*(\\d+) credits?\\.$", "$1")); // TODO
 		// Grab the entire description.
 		String desc = element.selectFirst(".courseblockdesc").text();
+		
+		System.out.println("Scraping " + name);
 		
 		String parents = "";
 		List<String> prereqs = new ArrayList<>();
@@ -267,6 +244,11 @@ public class Scraper {
 		System.out.println(System.getProperty("user.dir").toString());
 		//Talk to Nathan about querying SQL if we're doing it that way.
 		return new Date(1992);
+	}
+	
+	// For testing purposes only.
+	static String parsePrereqs(String block) {
+		return parsePrereqs(block, new ArrayList<>(), new ArrayList<>());
 	}
 	
 }
