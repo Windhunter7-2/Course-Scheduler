@@ -499,4 +499,31 @@ public class RunAlgorithm {
 		return null;
 	}
 
+	private void setPrereqCounts() {
+		totalCount = 0;
+		for(int i = 0; i < adjacencyList.length; i++) {
+			if(coursePrereqCounts[i] == -1) {
+				this.setPrereqCount(i);
+			}
+			totalCount += coursePrereqCounts[i];
+		}
+	}
+
+	/**
+	 * This gets the flag of the given Course.
+	 * @param course The course from which to return the flag.
+	 * @return The flag from the given course as an integer.
+	 */
+	private int getFlag(Course course) {
+		return course.getFlag();
+	}
+
+	/**
+	 * This sets the flag of the given Course to the given number.
+	 * @param course The course to which the new flag will be set.
+	 * @param newFlag The new flag of the given course.
+	 */
+	private void setFlag(Course course, int newFlag) {
+		course.setFlag(newFlag);
+	}
 }
