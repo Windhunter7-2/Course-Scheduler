@@ -30,20 +30,20 @@ public class ScraperTests {
 		
 		// Tests that each course was correctly inserted and retrieved from the database.
 		for (Course course : courses) {
-			Optional<Course> closest = retrieved.stream().filter(c -> c.code.equals(course.code)).findFirst();
+			Optional<Course> closest = retrieved.stream().filter(c -> c.getCode().equals(course.getCode())).findFirst();
 			if (!retrieved.contains(course)) {
 				Course r = closest.get();
 				Course c = course;
-				System.out.println(r.credits == c.credits);
-				System.out.println(r.flag == c.flag);
-				System.out.println(Objects.equals(r.fullName, c.fullName));
-				System.out.println(Objects.equals(r.name, c.name));
-				System.out.println(Objects.equals(r.type, c.type));
-				System.out.println(Objects.equals(r.desc, c.desc));
-				System.out.println(Objects.equals(r.code, c.code));
-				System.out.println(Objects.equals(r.prerequisites, c.prerequisites));
-				System.out.println(Objects.equals(r.coreqs, c.coreqs));
-				System.out.println(Objects.equals(r.parents, c.parents));
+				System.out.println(r.getCredits() == c.getCredits());
+				System.out.println(r.getFlag() == c.getFlag());
+				System.out.println(Objects.equals(r.getFullName(), c.getFullName()));
+				System.out.println(Objects.equals(r.getName(), c.getName()));
+				System.out.println(Objects.equals(r.getType(), c.getType()));
+				System.out.println(Objects.equals(r.getDesc(), c.getDesc()));
+				System.out.println(Objects.equals(r.getCode(), c.getCode()));
+				System.out.println(Objects.equals(r.getPrerequisites(), c.getPrerequisites()));
+				System.out.println(Objects.equals(r.getCoreqs(), c.getCoreqs()));
+				System.out.println(Objects.equals(r.getParents(), c.getParents()));
 			}
 			assertTrue(course + " was not preserved. Closest match: ", retrieved.contains(course));
 		}
@@ -127,16 +127,16 @@ public class ScraperTests {
 		Element el = Jsoup.parse(html).getAllElements().first();
 		
 		Course c = Scraper.scrapeCourse(el);
-		assertEquals("Introduction to Low-Level Programming", c.fullName);
-		assertEquals("CS 262", c.name);
-		assertEquals(3, c.credits);
-		assertEquals("CS", c.type);
+		assertEquals("Introduction to Low-Level Programming", c.getFullName());
+		assertEquals("CS 262", c.getName());
+		assertEquals(3, c.getCredits());
+		assertEquals("CS", c.getType());
 		assertEquals("Introduction to the language C, as well as operating system concepts, in UNIX, to prepare students for topics in systems programming. Offered by Computer Science. Limited to " +
-				"two attempts.", c.desc);
-		assertEquals("(CS-110|CS-101)&(CS-211|CS-222)", c.parents);
-		assertEquals(Arrays.asList("CS-110", "CS-101"), c.coreqs);
-		assertEquals(Arrays.asList("CS-110", "CS-101", "CS-211", "CS-222"), c.prerequisites);
-		assertEquals("CS262", c.code);
+				"two attempts.", c.getDesc());
+		assertEquals("(CS-110|CS-101)&(CS-211|CS-222)", c.getParents());
+		assertEquals(Arrays.asList("CS-110", "CS-101"), c.getCoreqs());
+		assertEquals(Arrays.asList("CS-110", "CS-101", "CS-211", "CS-222"), c.getPrerequisites());
+		assertEquals("CS262", c.getCode());
 	}
 	
 }

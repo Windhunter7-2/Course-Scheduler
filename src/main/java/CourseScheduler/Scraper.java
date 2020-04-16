@@ -260,16 +260,16 @@ public class Scraper {
 		
 		int i = 1;
 		for (Course course : courses) {
-			statement.setString(i++, course.code);
-			statement.setString(i++, course.fullName);
-			statement.setInt(i++, Integer.parseInt(course.name.split(" ")[1]));
-			statement.setString(i++, course.type);
-			statement.setInt(i++, course.credits);
-			statement.setString(i++, course.desc);
-			statement.setString(i++, String.join(",", course.prerequisites));
-			statement.setString(i++, String.join(",", course.coreqs));
-			statement.setInt(i++, course.flag);
-			statement.setString(i++, course.parents);
+			statement.setString(i++, course.getCode());
+			statement.setString(i++, course.getFullName());
+			statement.setInt(i++, Integer.parseInt(course.getName().split(" ")[1]));
+			statement.setString(i++, course.getType());
+			statement.setInt(i++, course.getCredits());
+			statement.setString(i++, course.getDesc());
+			statement.setString(i++, String.join(",", course.getPrerequisites()));
+			statement.setString(i++, String.join(",", course.getCoreqs()));
+			statement.setInt(i++, course.getFlag());
+			statement.setString(i++, course.getParents());
 		}
 		
 		System.out.println("Executing... ");
