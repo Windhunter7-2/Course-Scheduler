@@ -1,6 +1,7 @@
 package CourseScheduler;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Course {
 	
@@ -25,7 +26,7 @@ public class Course {
 	 */
 	public final String desc;
 	/**
-	 * The informal code for the course, which combines the type and number, eg "CS321"
+	 * The informal code for the course, which combines the type and number, eg "CS-321"
 	 */
 	public final String code;
 	/**
@@ -118,5 +119,31 @@ public class Course {
 		sb.append(", flag=").append(flag);
 		sb.append('}');
 		return sb.toString();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Course course = (Course) o;
+		return credits == course.credits &&
+				flag == course.flag &&
+				Objects.equals(fullName, course.fullName) &&
+				Objects.equals(name, course.name) &&
+				Objects.equals(type, course.type) &&
+				Objects.equals(desc, course.desc) &&
+				Objects.equals(code, course.code) &&
+				Objects.equals(prerequisites, course.prerequisites) &&
+				Objects.equals(coreqs, course.coreqs) &&
+				Objects.equals(parents, course.parents);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(fullName, name, type, credits, desc, code, prerequisites, coreqs, flag, parents);
 	}
 }

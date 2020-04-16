@@ -7,8 +7,12 @@ import org.junit.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ScraperTests {
 	
@@ -21,9 +25,28 @@ public class ScraperTests {
 		catalog.create();
 		
 		Scraper scraper = new Scraper(catalog);
-		scraper.run();
+		List<Course> courses = scraper.run();
+		List<Course> retrieved = catalog.getCourses();
 		
-		// TODO actual tests
+		// Tests that each course was correctly inserted and retrieved from the database.
+		for (Course course : courses) {
+			Optional<Course> closest = retrieved.stream().filter(c -> c.code.equals(course.code)).findFirst();
+			if (!retrieved.contains(course)) {
+				Course r = closest.get();
+				Course c = course;
+				System.out.println(r.credits == c.credits);
+				System.out.println(r.flag == c.flag);
+				System.out.println(Objects.equals(r.fullName, c.fullName));
+				System.out.println(Objects.equals(r.name, c.name));
+				System.out.println(Objects.equals(r.type, c.type));
+				System.out.println(Objects.equals(r.desc, c.desc));
+				System.out.println(Objects.equals(r.code, c.code));
+				System.out.println(Objects.equals(r.prerequisites, c.prerequisites));
+				System.out.println(Objects.equals(r.coreqs, c.coreqs));
+				System.out.println(Objects.equals(r.parents, c.parents));
+			}
+			assertTrue(course + " was not preserved. Closest match: ", retrieved.contains(course));
+		}
 	}
 	
 	@Test

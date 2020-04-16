@@ -241,11 +241,17 @@ public class Scraper {
 		c.createStatement().execute("DELETE FROM course;");
 	}
 	
+	/**
+	 * Saves a list of courses to the database.
+	 *
+	 * @param courses The courses to save.
+	 * @throws SQLException If something goes wrong saving the courses.
+	 */
 	void save(List<Course> courses) throws SQLException {
 		StringBuilder builder = new StringBuilder();
-		builder.append("INSERT INTO course (code, name, number, type, credits, description, prereqs, flag) VALUES");
+		builder.append("INSERT INTO course (code, name, number, type, credits, description, prereqs, coreqs, flag, parents) VALUES");
 		for (Course ignored : courses) {
-			builder.append("(?, ?, ?, ?, ?, ?, ?, ?),");
+			builder.append("(?, ?, ?, ?, ?, ?, ?, ?, ?, ?),");
 		}
 		builder.insert(builder.lastIndexOf(","), ";");
 		
@@ -261,16 +267,14 @@ public class Scraper {
 			statement.setInt(i++, course.credits);
 			statement.setString(i++, course.desc);
 			statement.setString(i++, String.join(",", course.prerequisites));
+			statement.setString(i++, String.join(",", course.coreqs));
 			statement.setInt(i++, course.flag);
+			statement.setString(i++, course.parents);
 		}
 		
 		System.out.println("Executing... ");
 		statement.execute();
 		System.out.println("Done.");
-	}
-	
-	void save(Course course) throws SQLException {
-		save(Arrays.asList(course));
 	}
 	
 	public Date getLastRun() {
