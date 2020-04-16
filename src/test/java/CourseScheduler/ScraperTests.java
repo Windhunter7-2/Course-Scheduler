@@ -21,9 +21,7 @@ public class ScraperTests {
 		catalog.create();
 		
 		Scraper scraper = new Scraper(catalog);
-		scraper.run().forEach(c -> {
-			System.out.println(c.toString());
-		});
+		scraper.run();
 		
 		// TODO actual tests
 	}

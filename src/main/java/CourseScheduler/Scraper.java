@@ -43,7 +43,7 @@ public class Scraper {
 			courses.addAll(scrapeCourses(s));
 		}
 		
-		System.out.println("Found " + courses.size() + "courses");
+		System.out.println("Found " + courses.size() + " courses");
 		
 		save(courses);
 		
@@ -113,7 +113,7 @@ public class Scraper {
 		
 		// Also replace any test pre-requisites.
 		block = block.replaceAll("minimum score of \\d+ in '.*'", "");
-		
+		// Basic cleanup.
 		block = block.replaceAll("[.,]", "");
 		
 		StringBuilder out = new StringBuilder();
@@ -211,8 +211,6 @@ public class Scraper {
 		// Grab the entire description.
 		String desc = element.selectFirst(".courseblockdesc").text();
 		
-		System.out.println("Scraping " + name);
-		
 		String parents = "";
 		List<String> prereqs = new ArrayList<>();
 		List<String> coreqs = new ArrayList<>();
@@ -227,7 +225,7 @@ public class Scraper {
 				name.split(" ")[0],
 				credits,
 				desc,
-				name.split(" ")[0] + name.split(" ")[1],
+				name.split(" ")[0] + "-" + name.split(" ")[1],
 				prereqs,
 				coreqs,
 				0, // TODO flag method
@@ -266,7 +264,9 @@ public class Scraper {
 			statement.setInt(i++, course.flag);
 		}
 		
+		System.out.println("Executing... ");
 		statement.execute();
+		System.out.println("Done.");
 	}
 	
 	void save(Course course) throws SQLException {
