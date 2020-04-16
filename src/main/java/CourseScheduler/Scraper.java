@@ -235,8 +235,42 @@ public class Scraper {
 		);
 	}
 	
-	private void save(Course course) {
-		// TODO write to DB
+	/**
+	 * Drops all entries in the course table.
+	 */
+	private void dump() throws SQLException {
+		Connection c = db.get();
+		c.createStatement().execute("DELETE FROM course;");
+	}
+	
+	void save(List<Course> courses) throws SQLException {
+		StringBuilder builder = new StringBuilder();
+		builder.append("INSERT INTO course (code, name, number, type, credits, description, prereqs, flag) VALUES");
+		for (Course ignored : courses) {
+			builder.append("(?, ?, ?, ?, ?, ?, ?, ?),");
+		}
+		builder.insert(builder.lastIndexOf(","), ";");
+		
+		Connection c = db.get();
+		PreparedStatement statement = c.prepareStatement(builder.toString());
+		
+		int i = 1;
+		for (Course course : courses) {
+			statement.setString(i++, course.code);
+			statement.setString(i++, course.fullName);
+			statement.setInt(i++, Integer.parseInt(course.name.split(" ")[1]));
+			statement.setString(i++, course.type);
+			statement.setInt(i++, course.credits);
+			statement.setString(i++, course.desc);
+			statement.setString(i++, String.join(",", course.prerequisites));
+			statement.setInt(i++, course.flag);
+		}
+		
+		statement.execute();
+	}
+	
+	void save(Course course) throws SQLException {
+		save(Arrays.asList(course));
 	}
 	
 	public Date getLastRun() {
