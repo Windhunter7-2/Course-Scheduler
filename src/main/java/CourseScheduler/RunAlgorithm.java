@@ -1,7 +1,6 @@
 package CourseScheduler;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 public class RunAlgorithm {
@@ -41,12 +40,6 @@ public class RunAlgorithm {
 	 */
 	private List<Course> removedCourses;
 
-	/**
-	 * This is a temporary list of Courses that are "deleted" *only* from the or flags, and *only* involving the recursive
-	 * part. This is used to determine if the child of a parent should be removed or not when the parent is removed.
-	 */
-	private List<Course> tempRemovedCourses;
-
     /**
      * Sets all the Courses from the given list as the Courses for every index after 0 in adjacencyList,
      * as well as calls setPrereqCounts() to set the “level” counts for all those courses.
@@ -58,11 +51,12 @@ public class RunAlgorithm {
      */
 	public void setNodesList(List<Course> courseList) {
 	    this.adjacencyList = new Course[courseList.size() + 1];
+	    this.coursePrereqCounts = new int[courseList.size() + 1];
 	    ArrayList<String> gradPrereqs = new ArrayList<String>();
 	    for(int i = 0; i < courseList.size(); i++) {
 	    	gradPrereqs.add(courseList.get(i).getCode());
 		}
-	    Course graduation = new Course("Graduation", "Goal Completed", "GRAD",
+	    Course graduation = new Course("Goal Completed", "Graduation", "GRAD",
                 120, "All requisite courses completed. Congratulations!", "GRAD-999",
                 gradPrereqs, new ArrayList<String>(), 1234567890, "Everything");
 	    this.adjacencyList[0] = graduation;
@@ -75,6 +69,7 @@ public class RunAlgorithm {
 	        orderedCourseList[k] = null;
         }
 	    orderedListCount = 0;
+	    removedCourses = new ArrayList<Course>();
     }
 
 	/**
@@ -90,7 +85,7 @@ public class RunAlgorithm {
 		else
 			return -1;
 	}
-
+	
 	/**
 	 * This takes a flag and, if it's an or child flag, returns *which* or child flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
@@ -113,7 +108,7 @@ public class RunAlgorithm {
 		else
 			return -1;
 	}
-
+	
 	/**
 	 * This takes a flag and, if it's a corequisite flag, returns -1. Otherwise, it returns 1. (Or 0 for the 0 flag)
 	 * @param flag
@@ -122,7 +117,7 @@ public class RunAlgorithm {
 	private int coreqFlag(int flag)
 	{
 		int newFlag = 0;
-		if (flag < 0)
+		if ( (flag < 0) || (Math.abs(flag) == 9999) )
 			newFlag = -1;
 		else if (flag == 0)
 			newFlag = 0;
@@ -130,7 +125,7 @@ public class RunAlgorithm {
 			newFlag = 1;
 		return newFlag;
 	}
-
+	
 	/**
 	 * This is a helper method for getPrereq() that specifically is for dealing with the various flags. (AKA for different
 	 * flags, this method is for the conditionals of the different flags, to return the Course most likely to be chosen,
@@ -150,11 +145,11 @@ public class RunAlgorithm {
 		Course childCourseB = null;
 		int childIndexA = -1;
 		int childIndexB = -1;
-
+		
 		//Convert Strings to Courses/Indices
 		for (int i = 0; i < adjacencyList.length; i++)
 		{
-			String testName = adjacencyList[i].name;
+			String testName = adjacencyList[i].getName();
 			if ( testName.equals(childA) )
 			{
 				childCourseA = adjacencyList[i];
@@ -166,7 +161,11 @@ public class RunAlgorithm {
 				childIndexB = i;
 			}
 		}
-
+		
+		//Case for childA = childB
+		if ( childA.equals(childB) )
+			return childIndexA;
+		
 		//Case for Handling "null"
 		if ( (childA.equals("null")) || (childCourseA == null) )
 		{
@@ -177,19 +176,19 @@ public class RunAlgorithm {
 		}
 		else if ( (childB.equals("null")) || (childCourseB == null) )
 			return childIndexA;
-
+		
 		//Corequisite Flag
 		if ( (parentFlag < -1) && (numPrereqs == 1) )
 		{
-			if (childCourseA.flag < -1)
+			if (childCourseA.getFlag() < -1)
 				return childIndexA;
 			else
 				return childIndexB;
 		}
-
+		
 		//ALL Other Flags
-		int flagA = childCourseA.flag;
-		int flagB = childCourseB.flag;
+		int flagA = childCourseA.getFlag();
+		int flagB = childCourseB.getFlag();
 		int isParentFlag = parentFlag(parentFlag);
 		int isChildFlagA = childFlag(flagA);
 		int isChildFlagB = childFlag(flagB);
@@ -211,9 +210,9 @@ public class RunAlgorithm {
 			return childIndexA;
 		int countA = coursePrereqCounts[childIndexA];
 		int countB = coursePrereqCounts[childIndexB];
-
+		
 		//Standard And Flag
-		if ( (Math.abs(parentFlag) == 0) || (Math.abs(parentFlag) == 10) || (Math.abs(parentFlag) == 9999) )
+		if ( (parentFlag == 0) || (Math.abs(parentFlag) == 9999) )
 		{
 			if ( (Math.abs(flagA) == 9999) || (Math.abs(flagB) == 9999) )
 			{
@@ -227,9 +226,20 @@ public class RunAlgorithm {
 			else
 				returnedChildIndex = childIndexB;
 		}
+		
+		//Check for Count of 0 (And Enable Compatibility with Ors Still)
+		if (coursePrereqCounts[childIndexA] == 0)
+		{
+			if (coursePrereqCounts[childIndexB] == 0)
+				return -1;
+			else
+				countB = -1;
+		}
+		else if (coursePrereqCounts[childIndexB] == 0)
+			countA = -1;
 
 		//Or Flag (Same for ALL Or Flags)
-		else if ( (Math.abs(parentFlag) == 1000) || (Math.abs(parentFlag) == 1010) )
+		if (Math.abs(parentFlag) > 0)
 		{
 			//Check Childs of Childs
 			int isParentFlagA = parentFlag(flagA);
@@ -244,114 +254,34 @@ public class RunAlgorithm {
 				else if (isParentFlagB == -1)
 					countA = -1;
 			}
-
+			
 			//Pick Left Child
 			if (countA < countB)
 			{
 				//Set That the Child Is Picked
 				returnedChildIndex = childIndexA;
-				//Remove One of the Ors, if Applicable
+				//Remove the Or Not Selected (If Applicable)
 				if ( (isChildFlagA == isChildFlagB) && (!childA.equals(childB)) )
-				{
-					for (int i = 0; i < adjacencyList.length; i++)
-					{
-						int isParentFlagSub = parentFlag(adjacencyList[i].flag);
-						//For Every Occurrence of the Child As an Or
-						if ( (adjacencyList[i].prerequisites.contains(childB)) && (isParentFlagSub == isChildFlagB) )
-						{
-							//Remove from That Occurrence
-							adjacencyList[i].prerequisites.remove(childB);
-							int childIndex = courseToIndex(childB);
-							//If It Has Children, Remove *Non-Used* Children
-							if (coursePrereqCounts[childIndex] != 0)
-							{
-								//Reset tempRemovedCourses and Add to It *Non-Used* Children
-								tempRemovedCourses.clear();
-								tempRemovedCourses.add(adjacencyList[childIndex]);
-								lowerCount(childIndex, childIndex);
-								//Check if Parent Index Should Actually Be Added; Remove if Not
-								String nameSub = adjacencyList[childIndex].name;
-								for (int j = 1; j < adjacencyList.length; j++)
-								{
-									//Skip Over Current Slot (And Over Any "Removed" Temp Slots)
-									if ( (j == childIndex) || (tempRemovedCourses.contains(adjacencyList[j])) )
-										continue;
-									//If an Occurrence of !0 Found, Mark As Found (true)
-									if ( (coursePrereqCounts[j] != 0) && (adjacencyList[j].prerequisites.contains(nameSub)) )
-										tempRemovedCourses.remove(adjacencyList[childIndex]);
-								}
-								//Remove Duplicates
-								LinkedHashSet<Course> tempHashSet = new LinkedHashSet<Course>(tempRemovedCourses);
-								List<Course> tempNoDuplicates = new ArrayList<Course>(tempHashSet);
-								//Add All Non-Used Children to otherRemovedCourses
-								removedCourses.addAll(tempNoDuplicates);
-							}
-							//Reset the Flags (If Needed)
-							if (i != parentIndex)
-								flagCheck(i);
-						}
-					}
-					//Add the Child to otherRemovedCourses
-					lowerCount(childIndexB, parentIndex);
-				}
+					adjacencyList[parentIndex].getPrerequisites().remove(childB);
 			}
-
+			
 			//Pick Right Child
 			else
 			{
 				//Set That the Child Is Picked
 				returnedChildIndex = childIndexB;
-				//Remove One of the Ors, if Applicable
+				//Remove the Or Not Selected (If Applicable)
 				if ( (isChildFlagA == isChildFlagB) && (!childA.equals(childB)) )
-				{
-					for (int i = 0; i < adjacencyList.length; i++)
-					{
-						int isParentFlagSub = parentFlag(adjacencyList[i].flag);
-						//For Every Occurrence of the Child As an Or
-						if ( (adjacencyList[i].prerequisites.contains(childA)) && (isParentFlagSub == isChildFlagA) )
-						{
-							//Remove from That Occurrence
-							adjacencyList[i].prerequisites.remove(childA);
-							int childIndex = courseToIndex(childA);
-							//If It Has Children, Remove *Non-Used* Children
-							if (coursePrereqCounts[childIndex] != 0)
-							{
-								//Reset tempRemovedCourses and Add to It *Non-Used* Children
-								tempRemovedCourses.clear();
-								tempRemovedCourses.add(adjacencyList[childIndex]);
-								lowerCount(childIndex, childIndex);
-								//Check if Parent Index Should Actually Be Added; Remove if Not
-								String nameSub = adjacencyList[childIndex].name;
-								for (int j = 1; j < adjacencyList.length; j++)
-								{
-									//Skip Over Current Slot (And Over Any "Removed" Temp Slots)
-									if ( (j == childIndex) || (tempRemovedCourses.contains(adjacencyList[j])) )
-										continue;
-									//If an Occurrence of !0 Found, Mark As Found (true)
-									if ( (coursePrereqCounts[j] != 0) && (adjacencyList[j].prerequisites.contains(nameSub)) )
-										tempRemovedCourses.remove(adjacencyList[childIndex]);
-								}
-								//Remove Duplicates
-								LinkedHashSet<Course> tempHashSet = new LinkedHashSet<Course>(tempRemovedCourses);
-								List<Course> tempNoDuplicates = new ArrayList<Course>(tempHashSet);
-								//Add All Non-Used Children to otherRemovedCourses
-								removedCourses.addAll(tempNoDuplicates);
-							}
-							//Reset the Flags (If Needed)
-							if (i != parentIndex)
-								flagCheck(i);
-						}
-					}
-					//Add the Child to otherRemovedCourses
-					lowerCount(childIndexA, parentIndex);
-				}
+					adjacencyList[parentIndex].getPrerequisites().remove(childA);
 			}
+			//Reset the Flags (If Needed)
+			flagCheck(parentIndex);
 		}
-
+		
 		//Standard Return
 		return returnedChildIndex;
 	}
-
+	
 	/**
 	 * This is a helper method for getPrereq(). It lowers the count of the current Course.
 	 * @param indexOfChild The index of the Course to lower the count of
@@ -362,61 +292,21 @@ public class RunAlgorithm {
 		//For Errors
 		if (indexOfChild == -1)
 			return;
-
-		//Recursive Lowering; indexOfParent = Actual
-		if (indexOfChild == indexOfParent)
-		{
-			int numChildren = adjacencyList[indexOfParent].prerequisites.size();
-			for (int i = 0; i < numChildren; i++)
-			{
-				//Sub Variables
-				String nameSub = adjacencyList[indexOfParent].prerequisites.get(i);
-				int indexSub = courseToIndex(nameSub);
-				int numChildrenSub = adjacencyList[indexSub].prerequisites.size();
-				boolean nameSubKept = false;
-				for (int j = 1; j < adjacencyList.length; j++)
-				{
-					//Skip Over Current Slot (And Over Any "Removed" Temp Slots)
-					if ( (j == indexOfParent) || (tempRemovedCourses.contains(adjacencyList[j])) )
-						continue;
-					//If an Occurrence of !0 Found, Mark As Found (true)
-					if ( (coursePrereqCounts[j] != 0) && (adjacencyList[j].prerequisites.contains(nameSub)) )
-						nameSubKept = true;
-				}
-				//If Child Used Elsewhere, Ignore Lowering
-				if (nameSubKept)
-					continue;
-				//Base Case
-				if (numChildrenSub < 1)
-					tempRemovedCourses.add(adjacencyList[indexSub]);
-				//Recursive Case
-				else
-				{
-					lowerCount(indexSub, indexSub);
-					tempRemovedCourses.add(adjacencyList[indexSub]);
-				}
-			}
-			return;
-		}
-
+		
 		//"Lower Count" (Actual Lowering Done in Main Part of getPrereq())
 		if ( !removedCourses.contains(adjacencyList[indexOfChild]) )
 			removedCourses.add(adjacencyList[indexOfChild]);
-
+		if (indexOfParent != -1)
+		{
+			if ( adjacencyList[indexOfParent].getPrerequisites().contains(adjacencyList[indexOfChild].getName()) )
+				adjacencyList[indexOfParent].getPrerequisites().remove( adjacencyList[indexOfChild].getName() );
+		}
+		
 		//Special Alt Case for Graduation
 		if (indexOfParent == -1)
 			return;
-
-		//Remove Child Course
-		Course parentCourse = adjacencyList[indexOfParent];
-		for (int i = 0; i < parentCourse.prerequisites.size(); i++)
-		{
-			String currentChild = parentCourse.prerequisites.get(i);
-			if ( currentChild.equals(adjacencyList[indexOfChild].name) )
-				parentCourse.prerequisites.remove(currentChild);
-		}
 	}
-
+	
 	/**
 	 * This is a helper method for getPrereq_flagHelper(). It checks if the parent flag needs to be changed, and if so, changes it.
 	 * @param indexOfParent The index of the parent Course
@@ -425,54 +315,42 @@ public class RunAlgorithm {
 	{
 		//Variables
 		Course parentCourse = adjacencyList[indexOfParent];
-		boolean duplicateFlagFoundA = false;
-		boolean duplicateFlagFoundB = false;
 		int parentFlag = getFlag(adjacencyList[indexOfParent]);
 		int isParentFlag = parentFlag(parentFlag);
 		int isChildFlag = -1;
 		int maxFlag = 0;
-
-		//Find Any Flag of Same Type
-		for (int i = 0; i < parentCourse.prerequisites.size(); i++)
+		boolean moreOrFlags = false;
+		List<Integer> orFlags = new ArrayList<Integer>();
+		
+		//Find "Max" Flag (AKA Or Flag -> Corequisite Flag -> And Flag
+		for (int i = 0; i < parentCourse.getPrerequisites().size(); i++)
 		{
-			int index = courseToIndex(parentCourse.prerequisites.get(i));
-			isChildFlag = childFlag(adjacencyList[index].flag);
-			//Flag of Parent Type Found
+			int index = courseToIndex(parentCourse.getPrerequisites().get(i));
+			isChildFlag = childFlag(adjacencyList[index].getFlag());
+			//If Other Ors of Same Type Found
 			if (isParentFlag == isChildFlag)
 			{
-				if (!duplicateFlagFoundA)
-					duplicateFlagFoundA = true;
-				else if (duplicateFlagFoundA)
-					duplicateFlagFoundB = true;
+				if (moreOrFlags)
+					return;
+				if (!moreOrFlags)
+					moreOrFlags = true;
+				continue;
 			}
-		}
-
-		//No More Flags of the Type Exist
-		if (!duplicateFlagFoundB)
-		{
-			//Find "Max" Flag (AKA Or Flag -> Corequisite Flag -> And Flag
-			for (int i = 0; i < parentCourse.prerequisites.size(); i++)
+			int isCoreqFlag = coreqFlag(adjacencyList[index].getFlag());
+			//If Corequisite and Last, Break
+			if ( (isCoreqFlag == -1) && (parentCourse.getPrerequisites().size() == 1) )
 			{
-				int index = courseToIndex(parentCourse.prerequisites.get(i));
-				isChildFlag = childFlag(adjacencyList[index].flag);
-				//Skip Flag Being Removed (And Remove It)
-				if (isParentFlag == isChildFlag)
-				{
-					adjacencyList[index].flag = 0;
-					continue;
-				}
-				int isCoreqFlag = coreqFlag(adjacencyList[index].flag);
-				//If Corequisite and Last, Break
-				if ( (isCoreqFlag == -1) && (parentCourse.prerequisites.size() == 1) )
-				{
-					maxFlag = -9999;
-					break;
-				}
-				//If 0 Or Corequisite (Non-Last), Skip
-				if ( (isCoreqFlag == 0) || (isCoreqFlag == -1) )
-					continue;
-				//Else, Set to *That* Or
-				else
+				maxFlag = -9999;
+				break;
+			}
+			//If 0 Or Corequisite (Non-Last), Skip
+			if ( (isCoreqFlag == 0) || (isCoreqFlag == -1) )
+				continue;
+			//Else, Set to *That* Or (If at Least 2)
+			else
+			{
+				//More Than 1 of That Flag Type; Change
+				if ( orFlags.contains(isChildFlag) )
 				{
 					maxFlag = isChildFlag;
 					if (parentFlag < 0)
@@ -480,12 +358,14 @@ public class RunAlgorithm {
 					maxFlag *= 1000;
 					break;
 				}
+				//Only 1 of That Flag Type; Add
+				if ( orFlags.isEmpty() )
+					orFlags.add(isChildFlag);
 			}
-			System.out.println("	Set flag for " + parentCourse.name + " as " + maxFlag);
-			setFlag(parentCourse, maxFlag);
 		}
+		setFlag(parentCourse, maxFlag);
 	}
-
+	
 	/**
 	 * This is the main portion of the algorithm. It does a depth-first traversal on the given Course, adds that Course to
 	 * orderedCourseList, and "removes" it from adjacencyList via lowering the "count" to below 1.
@@ -495,7 +375,7 @@ public class RunAlgorithm {
 	private Course getPrereq(Course recursCourse)
 	{
 		//Case for When recursCourse Is Graduation
-		if (recursCourse.flag == 1234567890)
+		if (recursCourse.getFlag() == 1234567890)
 		{
 			//Determine Current Highest Count Course
 			int indexHighest = 0;
@@ -509,6 +389,13 @@ public class RunAlgorithm {
 				if ( removedCourses.contains(adjacencyList[i]) )
 				{
 					int amountToLower = coursePrereqCounts[i];
+					String nameSub = adjacencyList[i].getName();
+					//Remove Copies from Any Courses with It As a Prerequisite
+					for (int j = 0; j < adjacencyList.length; j++)
+					{
+						if ( adjacencyList[j].getPrerequisites().contains(nameSub) )
+							adjacencyList[j].getPrerequisites().remove(nameSub);
+					}
 					coursePrereqCounts[i] = 0;
 					totalCount -= amountToLower;
 					removedCourses.remove(adjacencyList[i]);
@@ -521,38 +408,42 @@ public class RunAlgorithm {
 					highestCount = coursePrereqCounts[i];
 				}
 			}
+			//Adds Highest Index Course When Applicable
+			List<String> childPrereqs_Root = adjacencyList[indexHighest].getPrerequisites();
+			if ( childPrereqs_Root.isEmpty() )
+			{
+				//Make Sure totalCount = 0 at All Courses Complete
+				if ( ( adjacencyList[indexHighest].getName().equals("Graduation") )
+						|| (orderedListCount == (orderedCourseList.length-1)) )
+				{
+					totalCount = 0;
+					return null;
+				}
+				//Remove Removed Course from Graduation
+				Course removedCourse = adjacencyList[indexHighest];
+				adjacencyList[0].getPrerequisites().remove( removedCourse.getName() );
+				//Lower Count & Add to orderedCourseList
+				orderedCourseList[orderedListCount] = adjacencyList[indexHighest];
+				orderedListCount++;
+				lowerCount(indexHighest, -1);
+				return adjacencyList[indexHighest];
+			}
 			//Execute getPrereq() for Highest Count
 			if (indexHighest != 0)
 				getPrereq(adjacencyList[indexHighest]);
 			//Return from Graduation Course so runAlgorithm() Can Run It Again
 			return null;
 		}
-
+		
 		//Set Variables
-		int parentIndex = courseToIndex(recursCourse.name);
+		int parentIndex = courseToIndex(recursCourse.getName());
 		int parentFlag = getFlag(recursCourse);
 		String childA = "";
 		String childB = "";
 		int indexChosen = -1;
-		int numPrereqs = recursCourse.prerequisites.size();
-		List<String> prereqs = recursCourse.prerequisites;
-
-		//Alternate Base Case (Graduation Base Case)
-		if (prereqs.size() < 1)
-		{
-			//Remove All Occurrences of the Removed Course
-			for (int i = 0; i < adjacencyList.length; i++)
-			{
-				if ( adjacencyList[i].prerequisites.contains(recursCourse.name) )
-					adjacencyList[i].prerequisites.remove(recursCourse.name);
-			}
-			//Lower Count & Add to orderedCourseList
-			orderedCourseList[orderedListCount] = recursCourse;
-			orderedListCount++;
-			lowerCount(parentIndex, -1);
-			return null;
-		}
-
+		int numPrereqs = recursCourse.getPrerequisites().size();
+		List<String> prereqs = recursCourse.getPrerequisites();
+		
 		//Loop Through to Find Appropriate Course
 		childA = prereqs.get(0);
 		if (prereqs.size() > 1)
@@ -563,62 +454,47 @@ public class RunAlgorithm {
 			indexChosen = getPrereq_flagHelper(parentFlag, numPrereqs, parentIndex, childA, childB);
 		for (int i = 0; i < (numPrereqs - 1); i++)
 		{
-			String childA_Origin = childA;	//Copy of Original childA Before Editing
+			int numPrereqs_Origin = numPrereqs;		//Copy of Original numPrereqs Before Editing
 			indexChosen = getPrereq_flagHelper(parentFlag, numPrereqs, parentIndex, childA, childB);
+			//Check if an Or Was Removed; If So, Return
+			numPrereqs = recursCourse.getPrerequisites().size();
+			if (numPrereqs < numPrereqs_Origin)
+				return null;
 			//For Case of -1 Returned from indexChosen
 			if (indexChosen == -1)
 				childA = "null";
-			//Set childA (Normal)
+			//Set childA
 			else
-				childA = adjacencyList[indexChosen].name;
+				childA = adjacencyList[indexChosen].getName();
 			//Set childB
 			if ( (i != (numPrereqs - 2)) && (numPrereqs > 2) )
-			{
-				//Get Or Condition
-				int childALoc = courseToIndex(childA_Origin);
-				int childBLoc = courseToIndex(childB);
-				int isChildFlagA = childFlag(adjacencyList[childALoc].flag);
-				int isChildFlagB = childFlag(adjacencyList[childBLoc].flag);
-				//If ONLY Both of the Children Are Ors
-				if ( (isChildFlagA != -1) && (isChildFlagB != -1) )
-				{
-					i--;
-					numPrereqs--;
-				}
 				childB = prereqs.get(i + 2);
-				//Reset Flag (For Certain Conditions)
-				parentFlag = getFlag(recursCourse);
-			}
 		}
 		if (indexChosen == -1)	//For if the Course Isn't Needed
 			return null;
-		//Flag Check for Ors
-		flagCheck(parentIndex);
-
+		
 		//No Children Left; Base Case
-		List<String> childPrereqs = adjacencyList[indexChosen].prerequisites;
+		List<String> childPrereqs = adjacencyList[indexChosen].getPrerequisites();
 		if ( childPrereqs.isEmpty() )
 		{
 			//Remove All Occurrences of the Removed Course
 			Course removedCourse = adjacencyList[indexChosen];
 			for (int i = 0; i < adjacencyList.length; i++)
 			{
-				if ( adjacencyList[i].prerequisites.contains(removedCourse.name) )
-					adjacencyList[i].prerequisites.remove(removedCourse.name);
+				if ( adjacencyList[i].getPrerequisites().contains(removedCourse.getName()) )
+					adjacencyList[i].getPrerequisites().remove(removedCourse.getName());
 			}
 			//Lower Count & Add to orderedCourseList
 			orderedCourseList[orderedListCount] = adjacencyList[indexChosen];
 			orderedListCount++;
 			lowerCount(indexChosen, parentIndex);
-			if ( (adjacencyList[parentIndex].flag != 0) && (adjacencyList[parentIndex].flag != Math.abs(9999)) )
-				flagCheck(parentIndex);
 			return adjacencyList[indexChosen];
 		}
-
+		
 		//Children Left; Recursive Case
 		else if ( !childPrereqs.isEmpty() )
 			getPrereq(adjacencyList[indexChosen]);
-
+		
 		//Return Statement for Errors
 		return null;
 	}
