@@ -4,10 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -282,13 +279,13 @@ public class Scraper {
 		System.out.println("Done.");
 	}
 
-	public LocalDateTime getLastRun() throws FileNotFoundException {
+	public LocalDateTime getLastRun() throws FileNotFoundException, IOException {
 		LocalDateTime timeLastRun = LocalDateTime.now();
-		String dateFileDir = System.getProperty("user.dir").concat("\\dateLastRun.txt");
+		File dateFile = LocalStorage.get("dateLastRun.txt");
 		String line = "";
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(dateFileDir));
-			while((line = br.readLine()) == null) {}
+			BufferedReader br = new BufferedReader(new FileReader(dateFile));
+			line = br.readLine();
 			timeLastRun = LocalDateTime.parse(line, DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss"));
 		} catch (IOException ex) {
 			System.out.println("IOException in Scraper.getLastRun()\n");
