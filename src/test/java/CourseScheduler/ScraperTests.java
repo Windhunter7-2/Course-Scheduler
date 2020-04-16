@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 public class ScraperTests {
 	
-//	@Test
+	@Test
 	public void test() throws IOException, SQLException {
 		Database db = new Database("scraper_test");
 		db.create();
@@ -31,49 +31,69 @@ public class ScraperTests {
 	@Test
 	public void prereqsParsing1() {
 		String s1 = Scraper.parsePrereqs("ACCT 351.");
-		assertEquals("ACCT351", s1);
+		assertEquals("ACCT-351", s1);
 	}
 	
 	@Test
 	public void prereqsParsing2() {
 		String s1 = Scraper.parsePrereqs("ACCT 351C. C Requires minimum grade of C.");
-		assertEquals("ACCT351", s1);
+		assertEquals("ACCT-351", s1);
 	}
 	
 	@Test
 	public void prereqsParsing3() {
 		String s1 = Scraper.parsePrereqs("(ACCT 351C). C Requires minimum grade of C.");
-		assertEquals("ACCT351", s1);
+		assertEquals("(ACCT-351)", s1);
 	}
 	
 	@Test
 	public void prereqsParsing4() {
 		String s1 = Scraper.parsePrereqs("(ACCT 351C and 101). C Requires minimum grade of C.");
-		assertEquals("ACCT351&ACCT101", s1);
+		assertEquals("(ACCT-351&ACCT-101)", s1);
 	}
 	
 	@Test
 	public void prereqsParsing5() {
 		String s1 = Scraper.parsePrereqs("(ACCT 351C and (ACCT 101 or 202)). C Requires minimum grade of C.");
-		assertEquals("(ACCT351&(ACCT101|ACCT202))", s1);
+		assertEquals("(ACCT-351&(ACCT-101|ACCT-202))", s1);
 	}
 	
 	@Test
 	public void prereqsParsing6() {
 		String s1 = Scraper.parsePrereqs("(MATH 105C, 105T, 104C, 104T, 113C or 123C). C Requires minimum grade of C.");
-		assertEquals("MATH105|MATH105T|MATH104|MATH104T|MATH113|MATH123", s1);
+		assertEquals("(MATH-105|MATH-105T|MATH-104|MATH-104T|MATH-113|MATH-123)", s1);
 	}
 	
 	@Test
 	public void prereqsParsing7() {
 		String s1 = Scraper.parsePrereqs("(CS 110C or 101) and (CS 211C or 222C). C Requires minimum grade of C.");
-		assertEquals("(CS110|CS101)&(CS211|CS222)", s1);
+		assertEquals("(CS-110|CS-101)&(CS-211|CS-222)", s1);
 	}
 	
 	@Test
 	public void prereqsParsing8() {
-		String s1 = Scraper.parsePrereqs("(CS 110C or 101) and (CS 211C or 222C). C Requires minimum grade of C.");
-		assertEquals("(CS110|CS101)&(CS211|CS222)", s1);
+		String s1 = Scraper.parsePrereqs("(FNAN 303B- or L303) and ((ACCT 303C or L303) or (ACCT 330C or L330)).\n" +
+												 "B- Requires minimum grade of B-.\n" +
+												 "C Requires minimum grade of C.");
+		assertEquals("(FNAN-303|FNAN-L303)&((ACCT-303|ACCT-L303)|(ACCT-330|ACCT-L330))", s1);
+	}
+	
+	@Test
+	public void prereqsParsing9() {
+		String s1 = Scraper.parsePrereqs("(ACCT 303) or (ACCT 330)");
+		assertEquals("(ACCT-303)|(ACCT-330)", s1);
+	}
+	
+	@Test
+	public void prereqsParsing10() {
+		String str = Scraper.parsePrereqs("((ACCT 203C, U203, 204C or U204) and (BUS 210C or U210) and (MATH 108C, U108, 113C, U113, 114C, U114, HNRT 225C or U225)). C Requires minimum grade of C.");
+		assertEquals("((ACCT-203|ACCT-U203|ACCT-204|ACCT-U204)&(BUS-210|BUS-U210)&(MATH-108|MATH-U108|MATH-113|MATH-U113|MATH-114|MATH-U114|HNRT-225|HNRT-U225))", str);
+	}
+	
+	@Test
+	public void prereqsParsing11() {
+		String str = Scraper.parsePrereqs("(ACCT 303 or 303L)");
+		assertEquals("(ACCT-303|ACCT-303L)", str);
 	}
 	
 	@Test
@@ -92,9 +112,9 @@ public class ScraperTests {
 		assertEquals("CS", c.type);
 		assertEquals("Introduction to the language C, as well as operating system concepts, in UNIX, to prepare students for topics in systems programming. Offered by Computer Science. Limited to " +
 				"two attempts.", c.desc);
-		assertEquals("(CS110|CS101)&(CS211|CS222)", c.parents);
-		assertEquals(Arrays.asList("CS110", "CS101"), c.coreqs);
-		assertEquals(Arrays.asList("CS110", "CS101", "CS211", "CS222"), c.prereqs);
+		assertEquals("(CS-110|CS-101)&(CS-211|CS-222)", c.parents);
+		assertEquals(Arrays.asList("CS-110", "CS-101"), c.coreqs);
+		assertEquals(Arrays.asList("CS-110", "CS-101", "CS-211", "CS-222"), c.prerequisites);
 		assertEquals("CS262", c.code);
 	}
 	
