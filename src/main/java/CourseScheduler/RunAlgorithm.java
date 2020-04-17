@@ -94,7 +94,7 @@ public class RunAlgorithm {
 	public Course[] runAlgorithm(List<Course> courseList) {
 		this.setNodesList(courseList);
 		this.convertFlags();
-		for(; totalCount >= 0; totalCount--) {
+		while(totalCount > 0) {
 			getPrereq(adjacencyList[0]);
 		}
 		int newCourseListSize = 0;
