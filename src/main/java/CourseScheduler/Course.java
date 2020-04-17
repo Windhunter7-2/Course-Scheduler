@@ -69,6 +69,19 @@ public class Course {
 		this.parents = parents;
 	}
 	
+	public Course(Course other) {
+		this.fullName = other.fullName;
+		this.name = other.name;
+		this.type = other.type;
+		this.credits = other.credits;
+		this.desc = other.desc;
+		this.code = other.code;
+		this.prerequisites = other.prerequisites;
+		this.coreqs = other.coreqs;
+		this.flag = other.flag;
+		this.parents = other.parents;
+	}
+	
 	public String getFullName() {
 		return fullName;
 	}
@@ -155,4 +168,5 @@ public class Course {
 	public int hashCode() {
 		return Objects.hash(fullName, name, type, credits, desc, code, prerequisites, coreqs, flag, parents);
 	}
+
 }
