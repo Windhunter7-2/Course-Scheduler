@@ -2,6 +2,7 @@ package CourseScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RunAlgorithm {
 	
@@ -50,6 +51,8 @@ public class RunAlgorithm {
      * @param courseList The list of courses the user has indicated they want to take.
      */
 	public void setNodesList(List<Course> courseList) {
+		courseList = courseList.stream().map(Course::new).collect(Collectors.toList());
+		
 		//Initialize adjacencyList and coursePrereqCounts
 	    this.adjacencyList = new Course[courseList.size() + 1];
 	    this.coursePrereqCounts = new int[courseList.size() + 1];
