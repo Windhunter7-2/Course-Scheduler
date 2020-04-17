@@ -50,23 +50,32 @@ public class RunAlgorithm {
      * @param courseList The list of courses the user has indicated they want to take.
      */
 	public void setNodesList(List<Course> courseList) {
+		//Initialize adjacencyList and coursePrereqCounts
 	    this.adjacencyList = new Course[courseList.size() + 1];
 	    this.coursePrereqCounts = new int[courseList.size() + 1];
-	    ArrayList<String> gradPrereqs = new ArrayList<String>();
-	    for(int i = 0; i < courseList.size(); i++) {
-	    	gradPrereqs.add(courseList.get(i).getCode());
+	    //Fill coursePrereqCounts with -1's for comparison in setPrereqCounts()
+	    for(int i = 0; i < this.coursePrereqCounts.length; i++) {
+	    	coursePrereqCounts[i] = -1;
 		}
+	    //Creates a List of Strings with data akin to courseList
+	    ArrayList<String> gradPrereqs = new ArrayList<String>();
+	    for(int j = 0; j < courseList.size(); j++) {
+	    	gradPrereqs.add(courseList.get(j).getCode());
+		}
+	    //Create a new "Course": graduation. Set it to the 0th index of adjacencyList.
 	    Course graduation = new Course("Goal Completed", "Graduation", "GRAD",
                 120, "All requisite courses completed. Congratulations!", "GRAD-999",
                 gradPrereqs, new ArrayList<String>(), 1234567890, "Everything");
 	    this.adjacencyList[0] = graduation;
-	    for(int j = 1; j < courseList.size() + 1; j++) {
-	        this.adjacencyList[j] = courseList.get(j - 1);
+	    //Populate adjacencyList with the Courses from courseList. Once done, call setPrereqCounts().
+	    for(int k = 1; k < courseList.size() + 1; k++) {
+	        this.adjacencyList[k] = courseList.get(k - 1);
         }
 		this.setPrereqCounts();
+	    //Prepare orderedCourseList for later population.
         orderedCourseList = new Course[courseList.size()];
-	    for(int k = 0; k < orderedCourseList.length; k++) {
-	        orderedCourseList[k] = null;
+	    for(int l = 0; l < orderedCourseList.length; l++) {
+	        orderedCourseList[l] = null;
         }
 	    orderedListCount = 0;
 	    removedCourses = new ArrayList<Course>();
@@ -369,7 +378,7 @@ public class RunAlgorithm {
 	/**
 	 * This is the main portion of the algorithm. It does a depth-first traversal on the given Course, adds that Course to
 	 * orderedCourseList, and "removes" it from adjacencyList via lowering the "count" to below 1.
-	 * @param recurseCourse The Course currently being recursively called for the method
+	 * @param recursCourse The Course currently being recursively called for the method
 	 * @return null The return type was only for a failsafe/backdoor, it's not technically needed
 	 */
 	private Course getPrereq(Course recursCourse)
@@ -500,7 +509,9 @@ public class RunAlgorithm {
 	}
 
 	private void setPrereqCounts() {
+		//Track totalCount as we step through Courses.
 		totalCount = 0;
+		//Add to totalCount, and find prereq counts for all courses missing one.
 		for(int i = 0; i < adjacencyList.length; i++) {
 			if(coursePrereqCounts[i] == -1) {
 				this.setPrereqCount(i);
