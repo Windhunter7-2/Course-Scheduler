@@ -85,6 +85,33 @@ public class RunAlgorithm {
     }
 
 	/**
+	 * This starts the algorithm, by first running setNodesList() with the given list as a parameter,
+	 * as well as calling convertFlags(), and then running a loop (Until totalCount equals 0),
+	 * and for each iteration of the loop, running getPrereq(adjacencyList[0]).
+	 * *After* the loop finishes, it then shortens orderedCourseList to no longer include the
+	 * “nulls” at the end of the array.
+	 */
+	public Course[] runAlgorithm(List<Course> courseList) {
+		this.setNodesList(courseList);
+		this.convertFlags();
+		for(; totalCount >= 0; totalCount--) {
+			getPrereq(adjacencyList[0]);
+		}
+		int newCourseListSize = 0;
+		for(int i = 0; i < orderedCourseList.length; i++) {
+			if(orderedCourseList[i] != null) {
+				newCourseListSize++;
+			}
+		}
+		Course[] newOrderedCourseList = new Course[newCourseListSize];
+		for(int j = 0; j < newCourseListSize; j++) {
+			newOrderedCourseList[j] = orderedCourseList[j];
+		}
+		orderedCourseList = newOrderedCourseList;
+		return orderedCourseList;
+	}
+
+	/**
 	 * This takes a flag and, if it's an or parent flag, returns *which* or parent flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
 	 * @return newFlag Which parent flag it is (Or -1, if not applicable)
