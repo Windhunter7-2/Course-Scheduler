@@ -205,6 +205,77 @@ public class RunAlgorithm {
 	}
 
 	/**
+	 * Takes a String form flag, and returns a version of that String with removed excess parentheses. This only is
+	 * meant to work with flags that have already passed through flagRearrange().
+	 * @param originalFlag
+	 * @return newFlag The String form of the flag to be returned, with the modifications
+	 */
+	private String flagParentheses(String originalFlag)
+	{
+		//Variables
+		Stack<Character> open = new Stack<Character>();	//Opening Parentheses
+		String compare = "";	//The Current Set Inside the Parentheses
+		String newFlag = "";	//New Flag
+		int currentChar = 0;	//Current Position in String
+		boolean removing = false;	//Set to True When in the Process of Removing an )
+		
+		//Continue Through String
+		while (true)
+		{
+			//End of String; Break
+			if (originalFlag.length() == currentChar)
+				break;
+			
+			//Get Current Character
+			char tempC = originalFlag.charAt(currentChar);
+			
+			//If (, Put on Stack open and Do Checks
+			if (tempC == '(')
+			{
+				open.push(tempC);
+				if ( open.size() > 1 )	//((
+				{
+					open.pop();
+					removing = true;
+				}
+			}
+			
+			//If ), Pop open and Move compare to newFlag
+			else if (tempC == ')')
+			{
+				if (removing)	//Special Case for Removing
+				{
+					removing = false;
+					currentChar++;
+					continue;
+				}
+				char parenth = open.pop();
+				newFlag = (newFlag + parenth + compare + tempC);
+				compare = "";
+			}
+			
+			//If Non-Parentheses, Add to compare
+			else
+			{
+				compare = (compare + tempC);
+				//Special Case for &'s
+				if (tempC == '&')
+				{
+					char prevC = originalFlag.charAt(currentChar - 1);
+					char nextC = originalFlag.charAt(currentChar + 1);
+					if ( (prevC == ')') && (nextC == '(') )
+					{
+						newFlag = (newFlag + tempC);
+						compare = "";
+					}
+				}
+			}
+			currentChar++;
+		}
+		return newFlag;
+	}
+
+	/**
 	 * This takes a flag and, if it's an or parent flag, returns *which* or parent flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
 	 * @return newFlag Which parent flag it is (Or -1, if not applicable)
