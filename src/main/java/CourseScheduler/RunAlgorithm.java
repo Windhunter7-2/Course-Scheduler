@@ -112,6 +112,99 @@ public class RunAlgorithm {
 	}
 
 	/**
+	 * Takes a String form flag, and returns a version of that String with it rearranged from alternate forms to proper
+	 * (A|B...)&(C|D...)... form, using propositional logic. For example, A|(B&C) would turn into (A|B)&(A|C)
+	 * @param originalFlag
+	 * @return newFlag The String form of the flag to be returned, with the modifications
+	 */
+	private String flagRearrange(String originalFlag)
+	{
+		//Convert from DNF to CNF
+		DnfToCnf converter = new DnfToCnf();
+		String CNF_Form = converter.rearrangeString(originalFlag);
+		
+		//Set Up Duplicate Handler
+		DnfToCnf duplicateHandler = new DnfToCnf();
+		String withDuplicates = duplicateHandler.stringReplacerA(CNF_Form);
+		withDuplicates = withDuplicates.replaceAll(" or ", "#");
+		withDuplicates = withDuplicates.replaceAll(" and ", "&");
+		
+		//Loop Through and Remove Duplicates
+		String withoutDuplicates = "";
+		int currentChar = 0;
+		List<String> duplicates = new ArrayList<String>();
+		while (true)
+		{
+			//End of String; Break
+			if (withDuplicates.length() == currentChar)
+				break;
+			
+			//Get Current Character
+			char tempC = withDuplicates.charAt(currentChar);
+			char nextC = withDuplicates.charAt(currentChar);
+			if ( withDuplicates.length() > (currentChar + 1) )
+				nextC = withDuplicates.charAt(currentChar + 1);
+			
+			//If Not A->Z, Add to withoutDuplicates Only
+			int isLetter = (int) tempC;
+			if (isLetter < 65)
+				withoutDuplicates = (withoutDuplicates + tempC);
+			
+			//Is a Letter; if in Duplicates, Remove (And Remove Next #)
+			else
+			{
+				int index = (isLetter - 65);
+				String currentCourse = duplicateHandler.originalString.get(index);
+				//Not in Duplicates Yet
+				if ( !duplicates.contains(currentCourse) )
+				{
+					withoutDuplicates = (withoutDuplicates + currentCourse);
+					duplicates.add(currentCourse);
+				}
+				//In Duplicates
+				else
+				{
+					if (nextC == '#')
+						currentChar++;
+				}
+			}
+			currentChar++;
+		}
+		
+		//Refine: Remove Excess #'s, and Rereplace #'s with |'s Again
+		String refined = "";
+		String remainder = withoutDuplicates;
+		currentChar = 0;
+		while (true)
+		{
+			//End of String; Break
+			if (withoutDuplicates.length() == currentChar)
+				break;
+			
+			//Get Current Character
+			char tempC = withoutDuplicates.charAt(currentChar);
+			
+			//Skip Excess #'s
+			String tempS = remainder.replaceAll("&", "");
+			tempS = tempS.replaceAll("#", "");
+			tempS = tempS.replaceAll("\\(", "");
+			tempS = tempS.replaceAll("\\)", "");
+			if ( tempS.isEmpty() && ((tempC == '&') || (tempC == '#')) )
+				break;
+			
+			//Add Character to refined
+			refined = (refined + tempC);
+			remainder = remainder.substring(1);
+			currentChar++;
+		}
+		//Rereplacement
+		refined = refined.replaceAll("#", "|");
+		
+		//Return
+		return refined;
+	}
+
+	/**
 	 * This takes a flag and, if it's an or parent flag, returns *which* or parent flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
 	 * @return newFlag Which parent flag it is (Or -1, if not applicable)
