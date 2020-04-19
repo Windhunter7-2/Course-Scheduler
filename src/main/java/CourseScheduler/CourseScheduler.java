@@ -1,25 +1,45 @@
 package CourseScheduler;
 
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import javafx.util.Callback;
 
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class CourseScheduler extends Application {
@@ -33,17 +53,35 @@ public class CourseScheduler extends Application {
 
     public void start(Stage primaryStage) throws Exception { //All GUI method calls will go in here
         try {
-            scraperGUI(primaryStage);
+            ArrayList<Course> courses = new ArrayList<Course>();
+            Course test1 = new Course("Software Engineering", "CS 321", "CS",
+                    3, "cee ess, threehundredtwentyone", "CS-321",
+                    new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
+            Course test2 = new Course("Fake Class", "FAKE 001", "FAKE",
+                    4, "eff ay kay ee zerozeroone", "FAKE-001",
+                    new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
+            Course test3 = new Course("Introduction to Biology", "BIOL 101", "BIOL",
+                    4, "bee eye oh ell oneohone", "BIOL-101",
+                    new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
+            ArrayList<String> prereq = new ArrayList<String>();
+            prereq.add(test1.getName());
+            courses.add(new Course("Software Architecture", "CS 310", "CS",
+                    3, "Cee ess threehundredten", "CS-310",
+                    prereq, new ArrayList<String>(), 6969, "Everything"));
+            courses.add(test1);
+            courses.add(test2);
+            courses.add(test3);
+            checkListGUI(courses, new Profile("Jack"), primaryStage);
         } catch(Exception e) {
             //Basic Exception catch for now - will expand later.
-            System.out.println(e.toString() + " in CourseScheduler.start()\n");
+            e.printStackTrace();
         }
-        try {
-            scraperGUI(primaryStage);
-        } catch(Exception e) {
-            //Basic Exception catch for now - will expand later.
-            System.out.println(e.toString() + " in CourseScheduler.start()\n");
-        }
+//        try {
+//            scraperGUI(primaryStage);
+//        } catch(Exception e) {
+//            //Basic Exception catch for now - will expand later.
+//            System.out.println(e.toString() + " in CourseScheduler.start()\n");
+//        }
     }
     public void profileGUI(Stage stage){
         //ArrayList<String> profilenames = new ArrayList<>();
@@ -134,12 +172,143 @@ public class CourseScheduler extends Application {
         timeLabel.setText("Last updated on " + dtf.format(LocalDateTime.now())); //Change to scraper.getLastRun().toString()); once method is complete.
     }
 
-    public void scraperGUI(Stage stage) {
+    private class CourseHelper {
+        public Course course;
+        public BooleanProperty reqd;
+        public BooleanProperty done;
+
+        public CourseHelper(Course _course, Boolean _reqd, Boolean _done) {
+            this.course = _course;
+            reqd.setValue(_reqd);
+            done.setValue(_done);
+        }
+
+        public BooleanProperty reqdProperty() {
+            return reqd;
+        }
+    }
+
+    private List<CourseHelper> toHelperList(List<Course> courseList, Profile profile) {
+        List<CourseHelper> helperList = new ArrayList<>();
+        for(int i = 0; i < courseList.size(); i++) {
+            if(courseList.get(i) != null) {
+                helperList.add(new CourseHelper(courseList.get(i), profile.getNeededCourses().contains(courseList.get(i).getCode()), profile.getDoneCourses().contains(courseList.get(i).getCode())));
+            }
+        }
+        return helperList;
+    }
+
+    private Course getCourseByCode(List<Course> courses, String code) {
+        Course ret = courses.get(0);
+        for(int i = 0; i < courses.size(); i++) {
+            if(courses.get(i).getCode().equals(code)) {
+                ret = courses.get(i);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * This converts a course to a string containing all of its information - for comparison
+     * to the user's search in checkListGUI().
+     * @param course the course to be converted to a String.
+     */
+    private String getAllCourseInfo(Course course) {
+        return (course.getFullName() + course.getName() + Integer.toString(course.getCredits()) + course.getDesc());
+    }
+
+    /**
+     * This is the GUI for the Course checklist displayed by the program, where the user can use a Course search,
+     * as well as change their current Profile settings via checkbox selection of Courses and/or changing their
+     * credits or semester counts. The parameters are the list of *all* Courses, as well as the user’s chosen Profile.
+     * The user has the option to click on "Back" to go back to the previous, main GUI (selectProfile()); after the user
+     * has selected the "Save" button, generateSchedule() is called, with the list of "Needed" Courses chosen by the
+     * user, but *without* any instances of the "Done" Courses as prerequisites to *any* of those Courses, as the
+     * parameter.
+     */
+    public void checkListGUI(List<Course> courseList, Profile profile, Stage stage) {
+        TableView<Course> courseTable = new TableView<Course>();
+        TableView<CourseHelper> checkBoxTable = new TableView<CourseHelper>();
+        ObservableList<CourseHelper> helpers = FXCollections.observableArrayList(this.toHelperList(courseList, profile));
+        ObservableList<Course> courses = FXCollections.observableArrayList(courseList);
+        stage.setTitle("Create Your Schedule");
+        Scene scene = new Scene(new Group());
+
+        final Label selectClassesHeader = new Label("Select Classes");
+        selectClassesHeader.setFont(new Font("Arial", 20));
+
+        courseTable.setEditable(true);
+        checkBoxTable.setEditable(true);
+        courseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        checkBoxTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<CourseHelper, Boolean> needBoxes = new TableColumn("Required");
+        needBoxes.setMinWidth(50);
+        needBoxes.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>() {
+                    @Override
+                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
+                        return param.getValue().reqd;
+                    }
+                }
+        );
+
+        TableColumn<CourseHelper, Boolean> doneBoxes = new TableColumn("Completed");
+        doneBoxes.setMinWidth(50);
+
+
+        TableColumn courseCreds = new TableColumn("Credits");
+        courseCreds.setMinWidth(50);
+        courseCreds.setCellValueFactory(new PropertyValueFactory<Course, String>("credits"));
+
+        TableColumn courseAbbrevs = new TableColumn("Course Code");
+        courseAbbrevs.setMinWidth(100);
+        courseAbbrevs.setCellValueFactory(new PropertyValueFactory<Course, String>("name"));
+
+        TableColumn courseNames = new TableColumn("Course Name");
+        courseNames.setMinWidth(500);
+        courseNames.setCellValueFactory(new PropertyValueFactory<Course, String>("fullName"));
+
+        FilteredList<Course> flCourse = new FilteredList(courses, p -> true);
+        FilteredList<CourseHelper> flChecks = new FilteredList(helpers, p -> true);
+        courseTable.setItems(flCourse);
+        checkBoxTable.setItems(flChecks);
+        courseTable.getColumns().addAll(courseCreds, courseAbbrevs, courseNames);
+        checkBoxTable.getColumns().addAll(needBoxes, doneBoxes);
+
+        TextField courseSearchBox = new TextField();
+        courseSearchBox.setPromptText("Search a course...");
+        courseSearchBox.setOnKeyReleased(keyEvent -> {
+            flCourse.setPredicate(p -> this.getAllCourseInfo(p).toLowerCase().trim().contains(courseSearchBox.getText().toLowerCase().trim()));
+            flChecks.setPredicate(p -> this.getAllCourseInfo(p.course).toLowerCase().trim().contains(courseSearchBox.getText().toLowerCase().trim()));
+        });
+
+        HBox searchHBox = new HBox(courseSearchBox);
+        searchHBox.setAlignment(Pos.CENTER_LEFT);
+        HBox tableHBox = new HBox(checkBoxTable, courseTable);
+        tableHBox.setAlignment(Pos.CENTER);
+
+        final VBox tableSearchVBox = new VBox();
+        tableSearchVBox.setSpacing(5);
+        tableSearchVBox.setPadding(new Insets(10, 0, 0, 10));
+        tableSearchVBox.getChildren().addAll(selectClassesHeader, searchHBox, tableHBox);
+
+        ((Group)scene.getRoot()).getChildren().addAll(tableSearchVBox);
+
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    /**
+     * This is a GUI that has buttons to activate the scraper program via accessing Scraper.java’s
+     * run() method, and it will also display the time it was last run, via the getLastRun() method.
+     * @param stage the stage on which to display the GUI.
+     */
+    public void scraperGUI(Stage stage) throws IOException {
         //Set up stage, and elements of window.
         stage.setTitle("Rescrape Data");
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy - hh:mm:ss");
-        String lastUpdatedString = "Last updated on " + dtf.format(LocalDateTime.now());
-        Label lastRun = new Label(lastUpdatedString);  //Change to scraper.getLastRun().toString());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy, hh:mm:ss");
+        Label lastRun = new Label(scraper.getLastRun().toString());
         lastRun.setStyle("-fx-font-size:30");
         scrapeButton = new Button("Scrape Now");
         scrapeButton.setPrefSize(300, 80);
