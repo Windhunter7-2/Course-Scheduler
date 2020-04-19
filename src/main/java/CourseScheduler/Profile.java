@@ -159,4 +159,12 @@ public class Profile {
     public ArrayList<String> getDoneCourses() {
         return doneCourses;
     }
+
+    /**
+     * gets this profile's ID
+     * @return user_id
+     */
+    public int getID() {
+        return user_id;
+    }
 }
