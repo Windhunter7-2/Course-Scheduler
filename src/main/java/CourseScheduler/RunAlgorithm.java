@@ -284,6 +284,127 @@ public class RunAlgorithm {
 	}
 
 	/**
+	 * Takes a String form flag, and returns an integer representation of that flag. This only is meant to work with flags that
+	 * have already passed through both flagParentheses() and flagRearrange(). In addition, it helps to set the child flags,
+	 * as well. It also resets the prerequisites to only include the remaining ones after the conversion.
+	 * @param originalFlag
+	 * @param index The index of adjacencyList that it's relevant to
+	 * @return newFlag The integer form of the parent flag to be returned
+	 */
+	private int flagToInt(String originalFlag, int index)
+	{
+		//Variables
+		int newFlag = 0;
+		int currentChar = 0;
+		int [] orNumbers = new int[26];	//Positioning: 0 for A, 1 for B, etc.
+		for (int i = 0; i < 26; i++)
+			orNumbers[i] = 0;	//0 for No Ors, 1 for Or#1, 2 for Or#2, etc.
+		int orthNumber = 1;	//Which Or the Current Or Is, e.g. Or#1, etc.
+		
+		//If No Parentheses, Add Parentheses
+		if ( (!originalFlag.contains("(")) && (!originalFlag.contains(")")) && (!originalFlag.isEmpty()) )
+			originalFlag = ("(" + originalFlag + ")");
+		
+		//If No Ors & Has Corequisite, Return -9999
+		if ( (!originalFlag.contains("|")) && (!adjacencyList[index].getCoreqs().isEmpty()) )
+			return -9999;
+		
+		//If Empty Or No Ors, Return As-Is
+		if ( (originalFlag.isEmpty()) || (!originalFlag.contains("|")) )
+			return 0;
+		
+		//Pre-Set Up String to Proper Format
+		DnfToCnf converter = new DnfToCnf();
+		String onlyLetters = converter.stringReplacerA(originalFlag);
+		onlyLetters = onlyLetters.replaceAll(" and ", "&");
+		onlyLetters = onlyLetters.replaceAll(" or ", "|");
+
+		//At Least One Or Found; Set Parent Flag
+		newFlag = 1000;
+		
+		//Corequisites
+		if (!adjacencyList[index].getCoreqs().isEmpty())
+			newFlag *= -1;
+
+		//Loop Through and Do Algorithm
+		while (true)
+		{
+			//End of String; Break
+			if (onlyLetters.length() == currentChar)
+				break;
+			
+			//Get Current Character
+			char tempC = onlyLetters.charAt(currentChar);
+			char nextC = onlyLetters.charAt(currentChar);
+			if ( onlyLetters.length() > (currentChar + 1) )
+				nextC = onlyLetters.charAt(currentChar + 1);
+			char prevC = onlyLetters.charAt(currentChar);
+			if (currentChar > 0)
+				prevC = onlyLetters.charAt(currentChar - 1);
+			
+			//If ), Increment orthNumber
+			if (tempC == ')')
+				orthNumber++;
+			
+			//If A->Z, Increment orNumber for That Course
+			int isLetter = (int) tempC;
+			if (! ( (isLetter < 65) || (isLetter > 90) ) )
+			{
+				if ( (nextC == '|') || (prevC == '|') )
+				{
+					int indexLetter = (isLetter - 65);
+					orNumbers[indexLetter] = orthNumber;
+				}
+			}
+			currentChar++;
+		}
+		
+		//Add to Child Flags
+		for (int i = 0; i < converter.originalString.size(); i++)
+		{
+			String name = converter.originalString.get(i);
+			int indexChild = courseToIndex(name);
+			int oldChildFlag = adjacencyList[indexChild].getFlag();
+			int newChildFlag = ( oldChildFlag + (orNumbers[i] * 10) );
+			adjacencyList[indexChild].setFlag(newChildFlag);
+		}
+		
+		//Remove Excess Prerequisites
+		adjacencyList[index].getPrerequisites().clear();
+		for (int i = 0; i < converter.originalString.size(); i++)
+		{
+			String name = converter.originalString.get(i);
+			adjacencyList[index].getPrerequisites().add(name);
+		}
+		
+		//Standard Return
+		return newFlag;
+	}
+	
+	/**
+	 * This converts all of the String versions of the flags to integer representations for use in the algorithm.
+	 */
+	private void convertFlags()
+	{
+		//Initialize All adjacencyList Flags to 0
+		for (int i = 1; i < adjacencyList.length; i++)
+			adjacencyList[i].setFlag(0);
+		
+		//Loop Through and Set Flags
+		for (int i = 1; i < adjacencyList.length; i++)
+		{
+			String baseFlag = flagRearrange( adjacencyList[i].getParents() );
+			String parentheticalFlag = flagParentheses(baseFlag);
+			int flagInt = flagToInt(parentheticalFlag, i);
+			int oldFlag = adjacencyList[i].getFlag();
+			int newFlag = ( oldFlag + Math.abs(flagInt) );
+			if ( (flagInt < 0) && (newFlag >= 0) )	//Corequisite Set
+				newFlag *= -1;
+			adjacencyList[i].setFlag(newFlag);
+		}
+	}
+
+	/**
 	 * This takes a flag and, if it's an or parent flag, returns *which* or parent flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
 	 * @return newFlag Which parent flag it is (Or -1, if not applicable)
