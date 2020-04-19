@@ -853,6 +853,48 @@ public class RunAlgorithm {
 	}
 
 	/**
+	 * This sets the “counts” in coursePrereqCounts equal to the “levels” of prerequisites that they have,
+	 * and for “leaves”, the count given is 1.
+	 * @param index The index of adjacencyList to apply the count for
+	 * @return newCount The count of the level
+	 */
+	private int setPrereqCount(int index)
+	{
+		//Special Case: Graduation
+		if (index == 0)
+		{
+			coursePrereqCounts[index] = 0;
+			return 0;
+		}
+		
+		//Base Case
+		int newCount = -1;
+		Course current = adjacencyList[index];
+		if ( current.getPrerequisites().isEmpty() )
+			newCount = 0;
+		
+		//Recursive Case
+		int max = 0;
+		for (int j = 0; j < current.getPrerequisites().size(); j++)
+		{
+			String child = current.getPrerequisites().get(j);
+			int childIndex = courseToIndex(child);
+			int count = coursePrereqCounts[childIndex];
+			if (count == -1)
+				newCount = setPrereqCount(childIndex);
+			if (count > max)
+				max = count;
+		}
+		if (newCount < 1)
+			newCount = max;
+			
+		//Return
+		newCount = (newCount + 1);
+		coursePrereqCounts[index] = newCount;
+		return (newCount);
+	}
+	
+	/**
 	 * This runs setPrereqCount(int) for every Course in adjacencyList; during this iteration, for any Courses that
 	 * already have a count listed in coursePrereqCounts, it does *not* run setPrereqCount(int) for that Course. This
 	 * method also makes totalCount the sum of coursePrereqCounts.
