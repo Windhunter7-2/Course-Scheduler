@@ -429,7 +429,7 @@ public class DnfToCnf {
 	/**
 	 * This contains copies of the original String reprentations of the Courses.
 	 */
-	private List<String> originalString;
+	public List<String> originalString;
 	
 	/**
 	 * This transforms every occurrence of a Course into just a letter A-Z, and stores the original representations
