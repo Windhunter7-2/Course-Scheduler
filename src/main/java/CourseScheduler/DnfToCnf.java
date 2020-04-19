@@ -437,7 +437,7 @@ public class DnfToCnf {
 	 * @param originalString The original String
 	 * @return newString The new version of the String, with characters A-Z and words instead of symbols instead
 	 */
-	private String stringReplacerA(String string_Original)
+	public String stringReplacerA(String string_Original)
 	{
 		String newString = "";
 		String currentCourse = "";
@@ -505,7 +505,7 @@ public class DnfToCnf {
 	 * @param originalString The original String
 	 * @return newString The new version of the String, with the full course names and regular symbols again
 	 */
-	private String stringReplacerB(String string_Original)
+	public String stringReplacerB(String string_Original)
 	{
 		String newString = "";
 		int currentChar = 0;
