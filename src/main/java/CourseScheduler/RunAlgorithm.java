@@ -119,6 +119,10 @@ public class RunAlgorithm {
 	 */
 	private String flagRearrange(String originalFlag)
 	{
+		//If No Parentheses, Return As-Is
+		if ( (!originalFlag.contains("(")) && (!originalFlag.contains(")")) )
+			return originalFlag;
+		
 		//Convert from DNF to CNF
 		DnfToCnf converter = new DnfToCnf();
 		String CNF_Form = converter.rearrangeString(originalFlag);
@@ -212,6 +216,10 @@ public class RunAlgorithm {
 	 */
 	private String flagParentheses(String originalFlag)
 	{
+		//If No Parentheses, Return As-Is
+		if ( (!originalFlag.contains("(")) && (!originalFlag.contains(")")) )
+			return originalFlag;
+		
 		//Variables
 		Stack<Character> open = new Stack<Character>();	//Opening Parentheses
 		String compare = "";	//The Current Set Inside the Parentheses
