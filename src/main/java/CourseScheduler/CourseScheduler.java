@@ -292,11 +292,13 @@ public class CourseScheduler extends Application {
         final Label neededHeader = new Label("Needed Classes");
         neededHeader.setFont(new Font("Arial", 20));
         ListView<CourseHelper> neededList = new ListView<>();
+        neededList.setMaxHeight(200);
         neededList.getItems().addAll(newNeededHelpers);
         neededList.setCellFactory(CheckBoxListCell.forListView(CourseHelper::reqdProperty));
         final Label doneHeader = new Label("Done Classes");
         doneHeader.setFont(new Font("Arial", 20));
         ListView<CourseHelper> doneList = new ListView<>();
+        doneList.setMaxHeight(200);
         doneList.getItems().addAll(newDoneHelpers);
         doneList.setCellFactory(CheckBoxListCell.forListView(CourseHelper::doneProperty));
         VBox neededDoneVBox = new VBox(5, neededHeader, neededList, doneHeader, doneList);
