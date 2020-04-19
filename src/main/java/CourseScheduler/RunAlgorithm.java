@@ -112,6 +112,27 @@ public class RunAlgorithm {
 	}
 
 	/**
+	 * This is a helper method. It takes the name of a Course as a parameter, and it returns the index of that
+	 * Course in adjacencyList.
+	 * @param name The name of the Course to find
+	 * @return index The index in adjacencyList that is where that Course is located
+	 */
+	private int courseToIndex(String name)
+	{
+		int index = -1;
+		for (int i = 0; i < adjacencyList.length; i++)
+		{
+			String currentName = adjacencyList[i].getName();
+			if ( currentName.equals(name) )
+			{
+				index = i;
+				break;
+			}
+		}
+		return index;
+	}
+	
+	/**
 	 * Takes a String form flag, and returns a version of that String with it rearranged from alternate forms to proper
 	 * (A|B...)&(C|D...)... form, using propositional logic. For example, A|(B&C) would turn into (A|B)&(A|C)
 	 * @param originalFlag
