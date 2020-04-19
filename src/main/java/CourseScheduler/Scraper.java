@@ -95,14 +95,14 @@ public class Scraper {
 	 *
 	 * @param block The block of text from the Catalog.
 	 * @param prereqs A list that will be populated with the pre-requisites (and coreqs) of the course.
-	 * @param coreqs A list that will be populated with stricly the coreqs of the course.
+	 * @param coreqs A list that will be populated with strictly the coreqs of the course.
 	 * @return A String to represent the pre-reqs.
 	 */
 	static String parsePrereqs(String block, List<String> prereqs, List<String> coreqs) {
 		// Detect all conditions for minimum grades and preserve them for later removal.
 		Map<String, String> conditions = new HashMap<>();
 		Pattern pattern = Pattern.compile("([A-Z]+[-+]?) Requires minimum grade of [A-Z]+[-+]?\\.?");
-		Matcher matcher = Pattern.compile("([A-Z]+[-+]?) Requires minimum grade of [A-Z]+[-+]?\\.?").matcher(block);
+		Matcher matcher = pattern.matcher(block);
 		while (matcher.find()) {
 			block = matcher.replaceFirst("");
 			conditions.put(matcher.group(1), matcher.group(0));
@@ -134,8 +134,7 @@ public class Scraper {
 		String join = "";
 		List<String> names = new ArrayList<>();
 		
-		// Pop classes on: or/and, close parenthesis, or string end
-		
+		// Pop classes on: parenthesis or string end
 		while (!block.isEmpty()) {
 			if (Character.isSpaceChar(block.charAt(0))) {
 				block = block.substring(1);
