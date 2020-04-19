@@ -852,6 +852,10 @@ public class RunAlgorithm {
 		return null;
 	}
 
+	/**
+	 * This runs setPrereqCount(int) for every Course in adjacencyList; during this iteration, for any Courses that
+	 * already have a count listed in coursePrereqCounts, it does *not* run setPrereqCount(int) for that Course. This
+	 * method also makes totalCount the sum of coursePrereqCounts.
 	private void setPrereqCounts() {
 		//Track totalCount as we step through Courses.
 		totalCount = 0;
