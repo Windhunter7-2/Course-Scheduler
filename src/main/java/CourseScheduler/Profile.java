@@ -34,10 +34,64 @@ public class Profile {
         return name;
     }
 
-    public void insertProfileDB(){
+    /**
+     * insersts a profile into the table of profiles in profileDB.
+     */
+    public void insertProfileTable(){
         user_profiles.insertProfile(name);
     }
 
+    /**
+     * inserts graduation courses associated with user id
+     * @param id each user has an id
+     * @param code course code
+     */
+    public void insertMyGradCoursesTable(int id, String code ){
+        user_profiles.insertMyGradCourses(id, code);
+    }
+    /**
+     * inserts done courses associated with user id
+     * @param id each user has an id
+     * @param code course code
+     */
+    public void insertNeededCoursesTable(int id, String code ){
+        user_profiles.insertNeededCourses(id, code);
+    }
+
+    /**
+     * inserts done courses associated with user id
+     * @param id each user has an id
+     * @param code course code
+     */
+    public void insertDoneCoursesTable(int id, String code ){
+        user_profiles.insertDoneCourses(id, code);
+    }
+
+    /**
+     * updaate mygrad  courses associated with user id
+     * @param id each user has an id
+     * @param code course code
+     */
+    public void updateMyGradCoursesTable(int id, String code ){
+        user_profiles.insertDoneCourses(id, code);
+    }
+    /**
+     * updaate needed courses associated with user id
+     * @param id each user has an id
+     * @param code course code
+     */
+    public void updateNeededCoursesTable(int id, String code ){
+        user_profiles.insertDoneCourses(id, code);
+    }
+
+    /**
+     * updaate done courses associated with user id
+     * @param id each user has an id
+     * @param code course code
+     */
+    public void updateDoneCoursesTable(int id, String code ){
+        user_profiles.insertDoneCourses(id, code);
+    }
     /**
      * sets user's choice of credits
      * @param credits overall credits.
