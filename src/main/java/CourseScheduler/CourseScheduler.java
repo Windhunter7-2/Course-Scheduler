@@ -166,7 +166,8 @@ public class CourseScheduler extends Application {
     }
     //Helper method to update the display of the time last run once scraping is complete.
     private void updateTime(Label timeLabel, DateTimeFormatter dtf) throws IOException {
-        timeLabel.setText("Last updated on " + scraper.getLastRun().toString());
+
+        timeLabel.setText("Last updated on " + dtf.format(scraper.getLastRun()));
     }
 
     /**
@@ -192,10 +193,6 @@ public class CourseScheduler extends Application {
             return reqdProperty().get();
         }
 
-        public final void setReqd(boolean required) {
-            reqdProperty().set(required);
-        }
-
         public BooleanProperty doneProperty() {
             return done;
         }
@@ -204,12 +201,8 @@ public class CourseScheduler extends Application {
             return doneProperty().get();
         }
 
-        public final void setDone(boolean completed) {
-            doneProperty().set(completed);
-        }
-
         public String toString() {
-            return this.course.getCode() + "\n(" + Integer.toString(this.course.getCredits()) + " credits)";
+            return this.course.getCode() + "\n(" + this.course.getCredits() + " credits)";
         }
     }
 
@@ -232,21 +225,21 @@ public class CourseScheduler extends Application {
         return helperList;
     }
 
-    /**
-     * Takes the course codes found in profile's needed and doneClasses lists and finds their corresponding courses.
-     * @param courses the list of all courses.
-     * @param code the code from which to find the corresponding course.
-     * @return the course corresponding to the code provided.
-     */
-    private Course getCourseByCode(List<Course> courses, String code) {
-        Course ret = courses.get(0);
-        for(int i = 0; i < courses.size(); i++) {
-            if(courses.get(i).getCode().equals(code)) {
-                ret = courses.get(i);
-            }
-        }
-        return ret;
-    }
+//    /**
+//     * Takes the course codes found in profile's needed and doneClasses lists and finds their corresponding courses.
+//     * @param courses the list of all courses.
+//     * @param code the code from which to find the corresponding course.
+//     * @return the course corresponding to the code provided.
+//     */
+//    private Course getCourseByCode(List<Course> courses, String code) {
+//        Course ret = courses.get(0);
+//        for(int i = 0; i < courses.size(); i++) {
+//            if(courses.get(i).getCode().equals(code)) {
+//                ret = courses.get(i);
+//            }
+//        }
+//        return ret;
+//    }
 
     /**
      * This converts a course to a string containing all of its information - for comparison
@@ -254,7 +247,7 @@ public class CourseScheduler extends Application {
      * @param course the course to be converted to a String.
      */
     private static String getAllCourseInfo(Course course) {
-        return (course.getFullName() + course.getName() + Integer.toString(course.getCredits()) + course.getDesc());
+        return (course.getFullName() + course.getName() + course.getCredits() + course.getDesc());
     }
 
     /**
@@ -268,14 +261,16 @@ public class CourseScheduler extends Application {
      * @param courseList the list of all courses that could be taken.
      * @param profile the profile selected in the previous GUI.
      * @param stage the stage on which to display this GUI
-     * @cs the instance of CourseScheduler calling this method.
+     * @param cs the instance of CourseScheduler calling this method.
      */
     public void checkListGUI(List<Course> courseList, Profile profile, Stage stage, CourseScheduler cs) {
-        TableView<Course> courseTable = new TableView<Course>();
-        TableView<CourseHelper> checkBoxTable = new TableView<CourseHelper>();
+        //Set up the table in which courses will dynamically populate rows as user searches.
+        TableView<Course> courseTable = new TableView<>();
+        TableView<CourseHelper> checkBoxTable = new TableView<>();
+        //Create and populate lists of CourseHelpers to aid in the GUI's dynamic elements.
         List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);
-        List<CourseHelper> newDoneHelpers = new ArrayList<CourseHelper>();
-        List<CourseHelper> newNeededHelpers = new ArrayList<CourseHelper>();
+        List<CourseHelper> newDoneHelpers = new ArrayList<>();
+        List<CourseHelper> newNeededHelpers = new ArrayList<>();
         for(int i = 0; i < helperList.size(); i++) {
             CourseHelper temp = helperList.get(i);
             if(temp.isDone()) {
@@ -285,26 +280,34 @@ public class CourseScheduler extends Application {
                 newNeededHelpers.add(temp);
             }
         }
+        //Cast the two main lists to ObservableLists for change detection.
         ObservableList<CourseHelper> helpers = FXCollections.observableArrayList(helperList);
         ObservableList<Course> courses = FXCollections.observableArrayList(courseList);
+        //Configure basic scene elements.
         stage.setTitle("Create Your Schedule");
         Scene scene = new Scene(new Group());
         //BEGIN RIGHT MODULE
+        //Create elements and configure sizes.
         final Label neededHeader = new Label("Needed Classes");
         neededHeader.setFont(new Font("Arial", 20));
         ListView<CourseHelper> neededList = new ListView<>();
         neededList.setMaxHeight(200);
         neededList.getItems().addAll(newNeededHelpers);
+        //Set checkbox state to align with CourseHelper's boolean for needed.
         neededList.setCellFactory(CheckBoxListCell.forListView(CourseHelper::reqdProperty));
+        //Create elements and configure sizes.
         final Label doneHeader = new Label("Done Classes");
         doneHeader.setFont(new Font("Arial", 20));
         ListView<CourseHelper> doneList = new ListView<>();
         doneList.setMaxHeight(200);
         doneList.getItems().addAll(newDoneHelpers);
+        //Set checkbox state to align with CourseHelper's boolean for done.
         doneList.setCellFactory(CheckBoxListCell.forListView(CourseHelper::doneProperty));
+        //Cram all the above elements into a VBox
         VBox neededDoneVBox = new VBox(5, neededHeader, neededList, doneHeader, doneList);
         //END RIGHT MODULE
         //BEGIN MIDDLE MODULE
+        //Configure basic elements and their size properties.
         final Label selectClassesHeader = new Label("Select Classes");
         selectClassesHeader.setFont(new Font("Arial", 20));
 
@@ -313,7 +316,8 @@ public class CourseScheduler extends Application {
         courseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         checkBoxTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        TableColumn<CourseHelper, Boolean> needBoxes = new TableColumn("Required");
+        //Configure how columns of the center tables are populated.
+        TableColumn needBoxes = new TableColumn("Required");
         needBoxes.setMinWidth(75);
         needBoxes.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>() {
@@ -321,9 +325,11 @@ public class CourseScheduler extends Application {
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
                         if(param.getValue().isReqd() && !neededList.getItems().contains(param.getValue())) {
                             neededList.getItems().add(param.getValue());
+                            Profile.user_profiles.insertNeededCourses(profile.getID(), param.getValue().course.getCode());
                         }
                         else if(!param.getValue().isReqd() && neededList.getItems().contains(param.getValue())) {
                             neededList.getItems().remove(param.getValue());
+                            Profile.user_profiles.deleteNeededCourses(profile.getID(), param.getValue().course.getCode());
                         }
                         return param.getValue().reqd;
                     }
@@ -339,9 +345,11 @@ public class CourseScheduler extends Application {
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
                         if(param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().add(param.getValue());
+//                            Profile.user_profiles.insertDoneCourses(profile.getID(), param.getValue().course.getCode());
                         }
                         else if(!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().remove(param.getValue());
+//                            Profile.user_profiles.deleteDoneCourses(profile.getID(), param.getValue().course.getCode());
                         }
                         return param.getValue().done;
                     }
@@ -407,13 +415,19 @@ public class CourseScheduler extends Application {
             profile.neededCourses = new ArrayList<String>();
             profile.doneCourses = new ArrayList<String>();
             for(int i = 0; i < helperList.size(); i++) {
-                if(helperList.get(i).reqd.getValue()) {
+                if(helperList.get(i).reqd.getValue() && !profile.neededCourses.contains(helperList.get(i))) {
                     profile.neededCourses.add(helperList.get(i).course.getCode());
                     Profile.user_profiles.insertNeededCourses(profile.getID(), helperList.get(i).course.getCode());
+                } else if(!helperList.get(i).reqd.getValue() && profile.neededCourses.contains(helperList.get(i))) {
+                    profile.neededCourses.remove(helperList.get(i).course.getCode());
+                    Profile.user_profiles.deleteNeededCourses(profile.getID(), helperList.get(i).course.getCode());
                 }
-                if(helperList.get(i).done.getValue()) {
+                if(helperList.get(i).done.getValue() && !profile.doneCourses.contains(helperList.get(i))) {
                     profile.doneCourses.add(helperList.get(i).course.getCode());
                     Profile.user_profiles.insertDoneCourses(profile.getID(), helperList.get(i).course.getCode());
+                } else if(!helperList.get(i).done.getValue() && profile.doneCourses.contains(helperList.get(i))) {
+                    profile.doneCourses.remove(helperList.get(i).course.getCode());
+                    Profile.user_profiles.deleteDoneCourses(profile.getID(), helperList.get(i).course.getCode());
                 }
             }
             if(!creditsTextBox.getText().equals("")) {

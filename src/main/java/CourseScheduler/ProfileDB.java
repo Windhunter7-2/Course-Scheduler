@@ -145,8 +145,35 @@ public class ProfileDB  {
             System.out.println(e.getMessage());
         }
     }
+    public void deleteNeededCourses(int id, String code ){
+        String sql = "DELETE FROM needed_courses WHERE user_id = id AND code = code";
+        try (Connection conn = connection;
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, code);
+            //pstmt.setDouble(2, capacity);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
     public void insertDoneCourses(int id, String code ){
         String sql = "INSERT INTO done_courses(user_id,code) VALUES(?,?)";
+        try (Connection conn = connection;
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, code);
+            //pstmt.setDouble(2, capacity);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void deleteDoneCourses(int id, String code ){
+        String sql = "DELETE FROM done_courses WHERE user_id = id AND code = code";
         try (Connection conn = connection;
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
