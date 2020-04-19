@@ -28,8 +28,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +41,6 @@ public class CourseScheduler extends Application {
     Stage stage;
     Scene scene;
     ArrayList<String> profilenames = new ArrayList<>();
-   //Button scrapeButton;
     Scraper scraper;
     final int GUIHEIGHT = 900, GUIWIDTH = 1100;
 
@@ -166,7 +164,10 @@ public class CourseScheduler extends Application {
     }
     //Helper method to update the display of the time last run once scraping is complete.
     private void updateTime(Label timeLabel, DateTimeFormatter dtf) throws IOException {
-
+       // File timeFileToUpdate = LocalStorage.get("dateLastRun.txt");
+        FileWriter fw = new FileWriter(LocalStorage.get("dateLastRun.txt"));
+        fw.write(dtf.format(LocalDateTime.now()));
+        fw.close();
         timeLabel.setText("Last updated on " + dtf.format(scraper.getLastRun()));
     }
 
@@ -458,11 +459,14 @@ public class CourseScheduler extends Application {
      * run() method, and it will also display the time it was last run, via the getLastRun() method.
      * @param stage the stage on which to display the GUI.
      */
-    public void scraperGUI(Stage stage) throws IOException {
+    public void scraperGUI(Stage stage, CourseScheduler cs) throws IOException {
         //Set up stage, and elements of window.
+        Button backButton = new Button("Back");
+        backButton.setPrefSize(150, 60);
+        backButton.setStyle("-fx-font-size:15");
         stage.setTitle("Rescrape Data");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy, hh:mm:ss");
-        Label lastRun = new Label(scraper.getLastRun().toString());
+        Label lastRun = new Label("Last updated on " + dtf.format(scraper.getLastRun()));
         lastRun.setStyle("-fx-font-size:30");
         Button scrapeButton = new Button("Scrape Now");
         scrapeButton.setPrefSize(300, 80);
@@ -475,6 +479,7 @@ public class CourseScheduler extends Application {
         gp.setVgap(200);
         gp.add(lastRun, 0, 0);
         gp.add(scrapeButton, 0, 1);
+        gp.add(backButton, 1, 1);
         gp.add(scraperStatus, 0, 2);
 
         //Set constraints - center everything so it's nice and pretty.
@@ -507,7 +512,7 @@ public class CourseScheduler extends Application {
                 return null;
             }
         };
-        //Define behavior of scrapeButton
+        //Define behavior of buttons
         EventHandler<ActionEvent> scrapeBtnPressed = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent scrapeReq) {
                 Thread scrapeThread = new Thread(scrapeTask);
@@ -517,8 +522,15 @@ public class CourseScheduler extends Application {
             }
         };
 
+        EventHandler<ActionEvent> backBtnPressed = new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent scrapeReq) {
+                cs.profileGUI(stage);
+            }
+        };
+
         //Configure dynamic scene elements.
         scrapeButton.setOnAction(scrapeBtnPressed);
+        backButton.setOnAction(backBtnPressed);
         scraperStatus.textProperty().bind(scrapeTask.messageProperty());
 
         //Show the scene created above.
