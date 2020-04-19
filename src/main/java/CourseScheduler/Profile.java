@@ -17,6 +17,9 @@ public class Profile {
          numcredits=18;
          numsemesters=8;
          user_id++;
+
+         neededCourses = new ArrayList<String>(); //Jack added this and the below line to aid CourseScheduler.checkListGUI()
+         doneCourses = new ArrayList<String>();
     }
 
     /**

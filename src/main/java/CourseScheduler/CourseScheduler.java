@@ -2,20 +2,21 @@ package CourseScheduler;
 
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
@@ -27,9 +28,6 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
@@ -47,12 +45,14 @@ public class CourseScheduler extends Application {
     Stage stage;
     Scene scene;
     ArrayList<String> profilenames = new ArrayList<>();
-    Button scrapeButton;
+   //Button scrapeButton;
     Scraper scraper;
     final int GUIHEIGHT = 900, GUIWIDTH = 1100;
 
     public void start(Stage primaryStage) throws Exception { //All GUI method calls will go in here
         try {
+//            scraper = new Scraper(new Catalog(new Database("testDB")));
+//            scraperGUI(primaryStage);
             ArrayList<Course> courses = new ArrayList<Course>();
             Course test1 = new Course("Software Engineering", "CS 321", "CS",
                     3, "cee ess, threehundredtwentyone", "CS-321",
@@ -61,7 +61,7 @@ public class CourseScheduler extends Application {
                     4, "eff ay kay ee zerozeroone", "FAKE-001",
                     new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
             Course test3 = new Course("Introduction to Biology", "BIOL 101", "BIOL",
-                    4, "bee eye oh ell oneohone", "BIOL-101",
+                    4, "bee eye oh ell onezeroone", "BIOL-101",
                     new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
             ArrayList<String> prereq = new ArrayList<String>();
             prereq.add(test1.getName());
@@ -71,7 +71,7 @@ public class CourseScheduler extends Application {
             courses.add(test1);
             courses.add(test2);
             courses.add(test3);
-            checkListGUI(courses, new Profile("Jack"), primaryStage);
+            checkListGUI(courses, new Profile("Jack"), primaryStage, this);
         } catch(Exception e) {
             //Basic Exception catch for now - will expand later.
             e.printStackTrace();
@@ -172,32 +172,75 @@ public class CourseScheduler extends Application {
         timeLabel.setText("Last updated on " + dtf.format(LocalDateTime.now())); //Change to scraper.getLastRun().toString()); once method is complete.
     }
 
-    private class CourseHelper {
+    /**
+     * CourseHelper is exactly akin to a course, but it tracks locally whether or not it has
+     * been added to the "needed" or "done" lists of a corresponding profile.
+     */
+    private static class CourseHelper {
         public Course course;
         public BooleanProperty reqd;
         public BooleanProperty done;
 
         public CourseHelper(Course _course, Boolean _reqd, Boolean _done) {
             this.course = _course;
-            reqd.setValue(_reqd);
-            done.setValue(_done);
+            reqd = new SimpleBooleanProperty(_reqd);
+            done = new SimpleBooleanProperty(_done);
         }
 
         public BooleanProperty reqdProperty() {
             return reqd;
         }
+
+        public final boolean isReqd() {
+            return reqdProperty().get();
+        }
+
+        public final void setReqd(boolean required) {
+            reqdProperty().set(required);
+        }
+
+        public BooleanProperty doneProperty() {
+            return done;
+        }
+
+        public final boolean isDone() {
+            return doneProperty().get();
+        }
+
+        public final void setDone(boolean completed) {
+            doneProperty().set(completed);
+        }
+
+        public String toString() {
+            return this.course.getCode() + "\n(" + Integer.toString(this.course.getCredits()) + " credits)";
+        }
     }
 
-    private List<CourseHelper> toHelperList(List<Course> courseList, Profile profile) {
+    /**
+     * Turns a List of courses into a list of CourseHelpers
+     * @param courseList the list of courses to be converted.
+     * @param profile the profile with which to check if courses have been marked "needed" or "done".
+     * @return the List or CourseHelpers
+     */
+    private static List<CourseHelper> toHelperList(List<Course> courseList, Profile profile) {
         List<CourseHelper> helperList = new ArrayList<>();
         for(int i = 0; i < courseList.size(); i++) {
             if(courseList.get(i) != null) {
-                helperList.add(new CourseHelper(courseList.get(i), profile.getNeededCourses().contains(courseList.get(i).getCode()), profile.getDoneCourses().contains(courseList.get(i).getCode())));
+                helperList.add(new CourseHelper(
+                        courseList.get(i),
+                        profile.getNeededCourses().contains(courseList.get(i).getCode()),
+                        profile.getDoneCourses().contains(courseList.get(i).getCode())));
             }
         }
         return helperList;
     }
 
+    /**
+     * Takes the course codes found in profile's needed and doneClasses lists and finds their corresponding courses.
+     * @param courses the list of all courses.
+     * @param code the code from which to find the corresponding course.
+     * @return the course corresponding to the code provided.
+     */
     private Course getCourseByCode(List<Course> courses, String code) {
         Course ret = courses.get(0);
         for(int i = 0; i < courses.size(); i++) {
@@ -213,7 +256,7 @@ public class CourseScheduler extends Application {
      * to the user's search in checkListGUI().
      * @param course the course to be converted to a String.
      */
-    private String getAllCourseInfo(Course course) {
+    private static String getAllCourseInfo(Course course) {
         return (course.getFullName() + course.getName() + Integer.toString(course.getCredits()) + course.getDesc());
     }
 
@@ -226,14 +269,39 @@ public class CourseScheduler extends Application {
      * user, but *without* any instances of the "Done" Courses as prerequisites to *any* of those Courses, as the
      * parameter.
      */
-    public void checkListGUI(List<Course> courseList, Profile profile, Stage stage) {
+    public void checkListGUI(List<Course> courseList, Profile profile, Stage stage, CourseScheduler cs) {
         TableView<Course> courseTable = new TableView<Course>();
         TableView<CourseHelper> checkBoxTable = new TableView<CourseHelper>();
-        ObservableList<CourseHelper> helpers = FXCollections.observableArrayList(this.toHelperList(courseList, profile));
+        List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);
+        List<CourseHelper> newDoneHelpers = new ArrayList<CourseHelper>();
+        List<CourseHelper> newNeededHelpers = new ArrayList<CourseHelper>();
+        for(int i = 0; i < helperList.size(); i++) {
+            CourseHelper temp = helperList.get(i);
+            if(temp.isDone()) {
+                newDoneHelpers.add(temp);
+            }
+            if(temp.isReqd()) {
+                newNeededHelpers.add(temp);
+            }
+        }
+        ObservableList<CourseHelper> helpers = FXCollections.observableArrayList(helperList);
         ObservableList<Course> courses = FXCollections.observableArrayList(courseList);
         stage.setTitle("Create Your Schedule");
         Scene scene = new Scene(new Group());
-
+        //BEGIN RIGHT MODULE
+        final Label neededHeader = new Label("Needed Classes");
+        neededHeader.setFont(new Font("Arial", 20));
+        ListView<CourseHelper> neededList = new ListView<>();
+        neededList.getItems().addAll(newNeededHelpers);
+        neededList.setCellFactory(CheckBoxListCell.forListView(CourseHelper::reqdProperty));
+        final Label doneHeader = new Label("Done Classes");
+        doneHeader.setFont(new Font("Arial", 20));
+        ListView<CourseHelper> doneList = new ListView<>();
+        doneList.getItems().addAll(newDoneHelpers);
+        doneList.setCellFactory(CheckBoxListCell.forListView(CourseHelper::doneProperty));
+        VBox neededDoneVBox = new VBox(5, neededHeader, neededList, doneHeader, doneList);
+        //END RIGHT MODULE
+        //BEGIN MIDDLE MODULE
         final Label selectClassesHeader = new Label("Select Classes");
         selectClassesHeader.setFont(new Font("Arial", 20));
 
@@ -243,19 +311,40 @@ public class CourseScheduler extends Application {
         checkBoxTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<CourseHelper, Boolean> needBoxes = new TableColumn("Required");
-        needBoxes.setMinWidth(50);
+        needBoxes.setMinWidth(75);
         needBoxes.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>() {
                     @Override
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
+                        if(param.getValue().isReqd() && !neededList.getItems().contains(param.getValue())) {
+                            neededList.getItems().add(param.getValue());
+                        }
+                        else if(!param.getValue().isReqd() && neededList.getItems().contains(param.getValue())) {
+                            neededList.getItems().remove(param.getValue());
+                        }
                         return param.getValue().reqd;
                     }
                 }
         );
+        needBoxes.setCellFactory(CheckBoxTableCell.forTableColumn(needBoxes));
 
         TableColumn<CourseHelper, Boolean> doneBoxes = new TableColumn("Completed");
-        doneBoxes.setMinWidth(50);
-
+        doneBoxes.setMinWidth(75);
+        doneBoxes.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>() {
+                    @Override
+                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
+                        if(param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
+                            doneList.getItems().add(param.getValue());
+                        }
+                        else if(!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
+                            doneList.getItems().remove(param.getValue());
+                        }
+                        return param.getValue().done;
+                    }
+                }
+        );
+        doneBoxes.setCellFactory(CheckBoxTableCell.forTableColumn(doneBoxes));
 
         TableColumn courseCreds = new TableColumn("Credits");
         courseCreds.setMinWidth(50);
@@ -266,7 +355,7 @@ public class CourseScheduler extends Application {
         courseAbbrevs.setCellValueFactory(new PropertyValueFactory<Course, String>("name"));
 
         TableColumn courseNames = new TableColumn("Course Name");
-        courseNames.setMinWidth(500);
+        courseNames.setMinWidth(150);
         courseNames.setCellValueFactory(new PropertyValueFactory<Course, String>("fullName"));
 
         FilteredList<Course> flCourse = new FilteredList(courses, p -> true);
@@ -279,8 +368,8 @@ public class CourseScheduler extends Application {
         TextField courseSearchBox = new TextField();
         courseSearchBox.setPromptText("Search a course...");
         courseSearchBox.setOnKeyReleased(keyEvent -> {
-            flCourse.setPredicate(p -> this.getAllCourseInfo(p).toLowerCase().trim().contains(courseSearchBox.getText().toLowerCase().trim()));
-            flChecks.setPredicate(p -> this.getAllCourseInfo(p.course).toLowerCase().trim().contains(courseSearchBox.getText().toLowerCase().trim()));
+            flCourse.setPredicate(p -> CourseScheduler.getAllCourseInfo(p).toLowerCase().trim().contains(courseSearchBox.getText().toLowerCase().trim()));
+            flChecks.setPredicate(p -> CourseScheduler.getAllCourseInfo(p.course).toLowerCase().trim().contains(courseSearchBox.getText().toLowerCase().trim()));
         });
 
         HBox searchHBox = new HBox(courseSearchBox);
@@ -292,9 +381,47 @@ public class CourseScheduler extends Application {
         tableSearchVBox.setSpacing(5);
         tableSearchVBox.setPadding(new Insets(10, 0, 0, 10));
         tableSearchVBox.getChildren().addAll(selectClassesHeader, searchHBox, tableHBox);
-
-        ((Group)scene.getRoot()).getChildren().addAll(tableSearchVBox);
-
+        //END MIDDLE MODULE
+        //BEGIN LEFT MODULE
+        final Label optionsHeader = new Label("Options");
+        optionsHeader.setFont(new Font("Arial", 20));
+        final Label creditsLabel = new Label("Maximum Credits\nper Semester");
+        final Label semestersLabel = new Label("Maximum Number\nof Semesters");
+        TextField creditsTextBox = new TextField();
+        creditsTextBox.setPromptText("15");
+        TextField semestersTextBox = new TextField();
+        semestersTextBox.setPromptText("8");
+        Button backButton = new Button("Back");
+        backButton.setPrefSize(150, 40);
+        backButton.setStyle("-fx-font-size:15");
+        backButton.setOnAction(e -> {
+            cs.profileGUI(stage);
+        });
+        Button saveButton = new Button("Save");
+        saveButton.setPrefSize(150, 40);
+        saveButton.setStyle("-fx-font-size:15");
+        saveButton.setOnAction(e -> {
+            profile.neededCourses = new ArrayList<String>();
+            profile.doneCourses = new ArrayList<String>();
+            for(int i = 0; i < helperList.size(); i++) {
+                if(helperList.get(i).reqd.getValue()) {
+                    profile.neededCourses.add(helperList.get(i).course.getCode());
+                }
+                if(helperList.get(i).done.getValue()) {
+                    profile.doneCourses.add(helperList.get(i).course.getCode());
+                }
+            }
+            profile.numcredits = Integer.parseInt(creditsTextBox.getText());
+            profile.numsemesters = Integer.parseInt(semestersTextBox.getText());
+        });
+        VBox optionsVBox = new VBox();
+        optionsVBox.setSpacing(12);
+        optionsVBox.setPadding(new Insets(10, 0, 0, 10));
+        optionsVBox.getChildren().addAll(optionsHeader, creditsLabel, creditsTextBox, semestersLabel, semestersTextBox, backButton, saveButton);
+        //END LEFT MODULE
+        //BEGIN COALESCENCE AND FINALIZATION
+        HBox grandHBox = new HBox(5, optionsVBox, tableSearchVBox, neededDoneVBox);
+        ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
         stage.setScene(scene);
         stage.show();
     }
@@ -310,7 +437,7 @@ public class CourseScheduler extends Application {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy, hh:mm:ss");
         Label lastRun = new Label(scraper.getLastRun().toString());
         lastRun.setStyle("-fx-font-size:30");
-        scrapeButton = new Button("Scrape Now");
+        Button scrapeButton = new Button("Scrape Now");
         scrapeButton.setPrefSize(300, 80);
         scrapeButton.setStyle("-fx-font-size:30");
         Label scraperStatus = new Label("");
@@ -343,7 +470,7 @@ public class CourseScheduler extends Application {
                     }
                 };
                 updateMessage("Scraping...");
-                //Replace later with the scrape() function.
+                //Replace later with the scrape() function.//////////////////////////////////////////
                 Thread.sleep(3000);
                 updateMessage("Scraping Complete");
                 Platform.runLater(timeUpdater);
