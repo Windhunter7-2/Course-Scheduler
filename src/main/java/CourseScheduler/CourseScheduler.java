@@ -27,7 +27,10 @@ import javafx.geometry.HPos;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -162,8 +165,8 @@ public class CourseScheduler extends Application {
         return profilenames;
     }
     //Helper method to update the display of the time last run once scraping is complete.
-    private void updateTime(Label timeLabel, DateTimeFormatter dtf) {
-        timeLabel.setText("Last updated on " + dtf.format(LocalDateTime.now())); //Change to scraper.getLastRun().toString()); once method is complete.
+    private void updateTime(Label timeLabel, DateTimeFormatter dtf) throws IOException {
+        timeLabel.setText("Last updated on " + scraper.getLastRun().toString());
     }
 
     /**
@@ -262,6 +265,10 @@ public class CourseScheduler extends Application {
      * has selected the "Save" button, generateSchedule() is called, with the list of "Needed" Courses chosen by the
      * user, but *without* any instances of the "Done" Courses as prerequisites to *any* of those Courses, as the
      * parameter.
+     * @param courseList the list of all courses that could be taken.
+     * @param profile the profile selected in the previous GUI.
+     * @param stage the stage on which to display this GUI
+     * @cs the instance of CourseScheduler calling this method.
      */
     public void checkListGUI(List<Course> courseList, Profile profile, Stage stage, CourseScheduler cs) {
         TableView<Course> courseTable = new TableView<Course>();
@@ -402,13 +409,23 @@ public class CourseScheduler extends Application {
             for(int i = 0; i < helperList.size(); i++) {
                 if(helperList.get(i).reqd.getValue()) {
                     profile.neededCourses.add(helperList.get(i).course.getCode());
+                    Profile.user_profiles.insertNeededCourses(profile.getID(), helperList.get(i).course.getCode());
                 }
                 if(helperList.get(i).done.getValue()) {
                     profile.doneCourses.add(helperList.get(i).course.getCode());
+                    Profile.user_profiles.insertDoneCourses(profile.getID(), helperList.get(i).course.getCode());
                 }
             }
-            profile.numcredits = Integer.parseInt(creditsTextBox.getText());
-            profile.numsemesters = Integer.parseInt(semestersTextBox.getText());
+            if(!creditsTextBox.getText().equals("")) {
+                profile.numcredits = Integer.parseInt(creditsTextBox.getText().replaceAll("[^\\d]", ""));
+            } else {
+                profile.numcredits = 15;
+            }
+            if(!semestersTextBox.getText().equals("")) {
+                profile.numsemesters = Integer.parseInt(semestersTextBox.getText().replaceAll("[^\\d]", ""));
+            } else {
+                profile.numsemesters = 8;
+            }
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
@@ -458,16 +475,19 @@ public class CourseScheduler extends Application {
         //Define task (scraping with message updates)
         Task<Void> scrapeTask = new Task<Void>() {
             @Override
-            public Void call() throws InterruptedException {
+            public Void call() throws InterruptedException, IOException, SQLException {
                 Runnable timeUpdater = new Runnable() {
                     @Override
                     public void run() {
-                        updateTime(lastRun, dtf);
+                        try {
+                            updateTime(lastRun, dtf);
+                        } catch(IOException ioe) {
+                            System.out.println(ioe.getMessage());
+                        }
                     }
                 };
                 updateMessage("Scraping...");
-                //Replace later with the scrape() function.//////////////////////////////////////////
-                Thread.sleep(3000);
+                scraper.run();
                 updateMessage("Scraping Complete");
                 Platform.runLater(timeUpdater);
                 return null;
