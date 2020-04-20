@@ -523,6 +523,79 @@ public class CourseScheduler extends Application {
         stage.show();
     }
 
+    /**
+     * This method takes as its parameters, in this order, the *ordered* Course list, the maximum number of
+     * credits per semester, and the maximum number of semesters to calculate for. It returns an *ordered*
+     * list of Semesters, where each Semester is determined based on the maximums for the numbers of credits
+     * and semesters to calculate.
+     * @param orderedList The ordered list of Courses gotten from RunAlgorithm
+     * @param maxCredits The maximum number of credits per semester to compute
+     * @param maxSemesters The maximum number of semesters to compute
+     * @return returned The ordered list of Semesters, each containing an ordered list of Courses
+     */
+    public List<Semester> cutOffCalc(Course[] orderedList, int maxCredits, int maxSemesters)
+    {
+		//Variables
+		int totalCount = 0;
+		List<Semester> returned = new ArrayList<Semester>();
+		Semester lastEntered = new Semester();
+		int numSemesters = (maxSemesters * maxCredits);
+		int i = 0;
+		
+		//Get Total Count
+		for (int j = 0; j < orderedList.length; j++)
+			totalCount += orderedList[j].getCredits();
+		
+		//Semester Counter
+		for (int j = 0; (numSemesters > 0 ); j++)
+		{
+			//Credit Counter
+			int numCredits = maxCredits;
+			Semester tempS = new Semester();
+			//Break #1
+			if (i >= orderedList.length)
+				break;
+			//Add to Semester
+			while ( (numCredits - orderedList[i].getCredits()) >= 0 )
+			{
+				if ( i == (orderedList.length - 1) )
+					break;
+				Course current = orderedList[i];
+				int credits = current.getCredits();
+				tempS.getSemester().add(current);
+				lastEntered = tempS;
+				numCredits -= credits;
+				i++;
+			}
+			//For Adding Last Course
+			if (maxCredits >= totalCount)
+			{
+				Course current = orderedList[i];
+				int credits = current.getCredits();
+				tempS.getSemester().add(current);
+				lastEntered = tempS;
+				numCredits -= credits;
+				i++;
+			}
+			//Break #2
+			if ( tempS.getSemester().isEmpty() )
+				break;
+			//Add to List of Semesters
+			returned.add(tempS);
+			numSemesters -= maxCredits;
+		}
+		
+		//For Adding Very Last Course
+		if ( i == (orderedList.length - 1) )
+		{
+			int index = returned.lastIndexOf(lastEntered);
+			Semester tempS = returned.get(index);
+			Course current = orderedList[i];
+			tempS.getSemester().add(current);
+		}
+		return returned;
+    }
+    
     public static void main(String[] args) throws Exception {
         launch(args);
     }
