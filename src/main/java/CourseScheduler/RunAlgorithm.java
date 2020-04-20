@@ -854,8 +854,8 @@ public class RunAlgorithm {
 	}
 
 	/**
-	 * This sets the “counts” in coursePrereqCounts equal to the “levels” of prerequisites that they have,
-	 * and for “leaves”, the count given is 1.
+	 * This sets the "counts" in coursePrereqCounts equal to the "levels" of prerequisites that they have,
+	 * and for "leaves", the count given is 1.
 	 * @param index The index of adjacencyList to apply the count for
 	 * @return newCount The count of the level
 	 */
