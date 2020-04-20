@@ -211,7 +211,7 @@ public class ProfileDB  {
     public ArrayList<String> getDoneCourses(int id) throws SQLException {
         ArrayList doneCourses = new ArrayList<String>();
         Statement statement = connection.createStatement();
-        String sql = "SELECT code FROM needed_courses WHERE user_id=id ;";
+        String sql = "SELECT code FROM done_courses WHERE user_id=id ;";
         ResultSet rs = statement.executeQuery(sql);
         if (rs.next()) {
             //int id = rs.getInt("first_column_name");
