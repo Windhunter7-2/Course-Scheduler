@@ -202,21 +202,21 @@ public class CourseScheduler extends Application {
         return helperList;
     }
 
-//    /**
-//     * Takes the course codes found in profile's needed and doneClasses lists and finds their corresponding courses.
-//     * @param courses the list of all courses.
-//     * @param code the code from which to find the corresponding course.
-//     * @return the course corresponding to the code provided.
-//     */
-//    private Course getCourseByCode(List<Course> courses, String code) {
-//        Course ret = courses.get(0);
-//        for(int i = 0; i < courses.size(); i++) {
-//            if(courses.get(i).getCode().equals(code)) {
-//                ret = courses.get(i);
-//            }
-//        }
-//        return ret;
-//    }
+    /**
+     * Takes the course codes found in profile's needed and doneClasses lists and finds their corresponding courses.
+     * @param courses the list of all courses.
+     * @param code the code from which to find the corresponding course.
+     * @return the course corresponding to the code provided.
+     */
+    private Course getCourseByCode(List<Course> courses, String code) {
+        Course ret = courses.get(0);
+        for(int i = 0; i < courses.size(); i++) {
+            if(courses.get(i).getCode().equals(code)) {
+                ret = courses.get(i);
+            }
+        }
+        return ret;
+    }
 
     /**
      * This converts a course to a string containing all of its information - for comparison
@@ -401,6 +401,11 @@ public class CourseScheduler extends Application {
             } else {
                 profile.setNumSemesters(8);
             }
+            List<Course> neededCourseList = new ArrayList<>();
+            for(int i = 0; i < newNeededHelpers.size(); i++) {
+                neededCourseList.add(getCourseByCode(courseList, profile.getNeeded().get(i)));
+            }
+            generateSchedule(neededCourseList, profile.getNumCredits(), profile.getNumSemesters());
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
