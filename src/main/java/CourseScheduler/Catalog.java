@@ -1,5 +1,6 @@
 package CourseScheduler;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,7 +22,7 @@ public class Catalog {
 	/**
 	 * Creates the catalog's necessary information in the database.
 	 */
-	public void create() throws SQLException {
+	public void create() throws SQLException, IOException {
 		String string = "CREATE TABLE IF NOT EXISTS course (" +
 				"code TEXT PRIMARY KEY NOT NULL," + // compound identifier of name + number for convenience
 				"name TEXT NOT NULL," + // eg 'Calc II'
@@ -43,7 +44,7 @@ public class Catalog {
 	 * Retrieves a list of the courses from the Catalog database. This might end up fetching the courses
 	 * if this method has not been called before.
 	 */
-	public List<Course> getCourses() throws SQLException {
+	public List<Course> getCourses() throws SQLException, IOException {
 		if (courses != null) return courses;
 		courses = new ArrayList<Course>();
 		loadCourses();
@@ -55,7 +56,7 @@ public class Catalog {
 	 *
 	 * @throws SQLException If loading fails for some reason.
 	 */
-	private void loadCourses() throws SQLException {
+	private void loadCourses() throws SQLException, IOException {
 		String string = "SELECT * FROM course;";
 		Connection connection = db.get();
 		Statement statement = connection.createStatement();

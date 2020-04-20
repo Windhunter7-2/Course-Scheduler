@@ -1,5 +1,6 @@
 package CourseScheduler;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class Profile {
 	 * @param name The name of the profile
 	 * @return A fully initialized Profile instance
 	 */
-	public static Profile load(String name) throws SQLException {
+	public static Profile load(String name) throws SQLException, IOException {
 		db.insertProfile(name);
 		Profile profile = new Profile(name);
 		profile.needed.addAll(db.getNeededCourses(name));
