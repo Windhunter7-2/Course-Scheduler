@@ -121,7 +121,10 @@ public class ProfileDB {
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
 		}
-  		
+  
+		if (codes.isEmpty())
+			return;
+		
 		StringBuilder sql = new StringBuilder("INSERT OR IGNORE INTO " + table + " (user_name, code) VALUES");
 		for (String ignored : codes) {
 			sql.append("(?, ?),");
@@ -132,9 +135,10 @@ public class ProfileDB {
 		try (Connection conn = db.get();
 			 PreparedStatement st = conn.prepareStatement(sql.toString())) {
 			for (String code : codes) {
-				st.setString(i, profile);
-				st.setString(i, code);
+				st.setString(i++, profile);
+				st.setString(i++, code);
 			}
+			st.execute();
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
 		}
