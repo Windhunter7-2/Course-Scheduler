@@ -13,7 +13,7 @@ public class ProfileDB {
 	private Database profiledb;
 	Connection connection;
 	
-	private ProfileDB() {
+	public ProfileDB() {
 		profiledb = new Database("user_profiles");
 		connection = profiledb.get();
 	}

@@ -79,6 +79,14 @@ public class CourseScheduler extends Application {
 //        }
     }
     public void profileGUI(Stage stage){
+        if (Profile.db == null) {
+            try {
+                Profile.db = new ProfileDB().create();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        
         //ArrayList<String> profilenames = new ArrayList<>();
         profilenames.add("Akeem");
         profilenames.add("Jack");
@@ -136,14 +144,7 @@ public class CourseScheduler extends Application {
 
 
     }
-
-    /**
-     * creates a new profile.
-     * @param name name of the user
-     */
-    public void createProfile(String name) throws SQLException {
-        Profile newprofile = Profile.load(name);
-    }
+    
     /**
      * loads a profile from the database.
      *
