@@ -105,9 +105,6 @@ public class CourseScheduler extends Application {
             if(value.equals("Create New Profile")) {
                 System.out.println(profilenames);
                 td.showAndWait();
-                //creates profile object from the Profile class
-                // TODO help
-                createProfile(td.getEditor().getText());
                 selectprofile.getItems().add(td.getEditor().getText());
             }
             else{
