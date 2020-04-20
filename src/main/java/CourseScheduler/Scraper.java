@@ -278,7 +278,7 @@ public class Scraper {
 		System.out.println("Done.");
 	}
 
-	public LocalDateTime getLastRun() throws FileNotFoundException, IOException {
+	public LocalDateTime getLastRun() throws IOException {
 		LocalDateTime timeLastRun = LocalDateTime.now();
 		File dateFile = LocalStorage.get("dateLastRun.txt");
 		String line = "";
@@ -291,6 +291,17 @@ public class Scraper {
 			ex.printStackTrace();
 		}
 		return timeLastRun;
+	}
+	
+	/**
+	 * @return Whether or not the scraper needs to run.
+	 */
+	public boolean needsToRun() {
+		try {
+			return getLastRun().isAfter(LocalDateTime.now().minusMonths(3));
+		} catch (IOException e) {
+			return true;
+		}
 	}
 	
 	// For testing purposes only.

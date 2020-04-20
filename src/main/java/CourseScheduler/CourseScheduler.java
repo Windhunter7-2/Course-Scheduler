@@ -39,43 +39,28 @@ public class CourseScheduler extends Application {
 
     Stage stage;
     Scene scene;
-    Scraper scraper;
+    private Catalog catalog;
+    private Scraper scraper;
     final int GUIHEIGHT = 900, GUIWIDTH = 1100;
     List<String> profileNames = new ArrayList<>();
 
     public void start(Stage primaryStage) throws Exception { //All GUI method calls will go in here
+        // TODO some kind of intialization screen?
+        catalog = new Catalog(new Database("catalog"));
+        scraper = new Scraper(catalog);
+        if (scraper.needsToRun())
+            scraper.run();
+        catalog.create();
+        
         if (Profile.db == null) {
-            try {
-                Profile.db = new ProfileDB().create();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
+            Profile.db = new ProfileDB().create();
         }
         
         this.profileNames = Profile.db.getProfiles();
         
         try {
-//            scraper = new Scraper(new Catalog(new Database("testDB")));
-//            scraperGUI(primaryStage);
-            ArrayList<Course> courses = new ArrayList<Course>();
-            Course test1 = new Course("Software Engineering", "CS 321", "CS",
-                    3, "cee ess, threehundredtwentyone", "CS-321",
-                    new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
-            Course test2 = new Course("Fake Class", "FAKE 001", "FAKE",
-                    4, "eff ay kay ee zerozeroone", "FAKE-001",
-                    new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
-            Course test3 = new Course("Introduction to Biology", "BIOL 101", "BIOL",
-                    4, "bee eye oh ell onezeroone", "BIOL-101",
-                    new ArrayList<String>(), new ArrayList<String>(), 300, "someParent");
-            ArrayList<String> prereq = new ArrayList<String>();
-            prereq.add(test1.getName());
-            courses.add(new Course("Software Architecture", "CS 310", "CS",
-                    3, "Cee ess threehundredten", "CS-310",
-                    prereq, new ArrayList<String>(), 6969, "Everything"));
-            courses.add(test1);
-            courses.add(test2);
-            courses.add(test3);
-            checkListGUI(courses, Profile.load("Jack"), primaryStage, this);
+//            scraperGUI(scraper);
+            checkListGUI(catalog.getCourses(), Profile.load("Jack"), primaryStage, this);
         } catch(Exception e) {
             //Basic Exception catch for now - will expand later.
             e.printStackTrace();
