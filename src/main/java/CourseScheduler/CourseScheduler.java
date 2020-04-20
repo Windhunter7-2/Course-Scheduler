@@ -59,8 +59,9 @@ public class CourseScheduler extends Application {
         this.profileNames = Profile.db.getProfiles();
         
         try {
+            profileGUI(primaryStage, catalog.getCourses(), this);
 //            scraperGUI(scraper);
-            checkListGUI(catalog.getCourses(), Profile.load("Jack"), primaryStage, this);
+//            checkListGUI(catalog.getCourses(), Profile.load("Jack"), primaryStage, this);
         } catch(Exception e) {
             //Basic Exception catch for now - will expand later.
             e.printStackTrace();
@@ -72,14 +73,20 @@ public class CourseScheduler extends Application {
 //            System.out.println(e.toString() + " in CourseScheduler.start()\n");
 //        }
     }
-    public void profileGUI(Stage stage){
+    public void profileGUI(Stage stage, List<Course> courseList, CourseScheduler cs){
        // StackPane pane = new StackPane();
         GridPane pane = new GridPane();
 
         ComboBox<String> selectprofile = new ComboBox();
         Label welcomeLabel = new Label("Welcome To Course Scheduler");
         Button btnContinue = new Button("Continue");
-        btnContinue.setOnAction(e->stage.setScene(new Scene(pane, 300, 275)));
+//        btnContinue.setOnAction(e-> {
+//            try {
+//                checkListGUI(courseList, prof, stage, cs);
+//            } catch (SQLException ex) {
+//                ex.printStackTrace();
+//            }
+//        });
         // create a text input dialog
         TextInputDialog td = new TextInputDialog();
         // setHeaderText
@@ -96,6 +103,13 @@ public class CourseScheduler extends Application {
                 selectprofile.getItems().add(td.getEditor().getText());
             }
         };
+        btnContinue.setOnAction(e-> {
+            try {
+                checkListGUI(courseList, Profile.load(selectprofile.getValue()), stage, cs);
+            } catch (SQLException | IOException ex) {
+                ex.printStackTrace();
+            }
+        });
 
         selectprofile.getItems().add("Create New Profile");
         //selectprofile.setOnAction(e->createnewprofile(selectprofile));
@@ -112,7 +126,7 @@ public class CourseScheduler extends Application {
         pane.add(selectprofile, 0, 1);
         pane.add(welcomeLabel, 0, 0);
         pane.add(btnContinue, 1,1 );
-        pane.getChildren().addAll(selectprofile);
+        //pane.getChildren().addAll(selectprofile);
         stage.setScene(new Scene(pane, 300, 275));
         stage.show();
     }
@@ -365,7 +379,7 @@ public class CourseScheduler extends Application {
         backButton.setPrefSize(150, 40);
         backButton.setStyle("-fx-font-size:15");
         backButton.setOnAction(e -> {
-            cs.profileGUI(stage);
+            cs.profileGUI(stage, courseList, cs);
         });
         Button saveButton = new Button("Save");
         saveButton.setPrefSize(150, 40);
@@ -409,7 +423,7 @@ public class CourseScheduler extends Application {
      * run() method, and it will also display the time it was last run, via the getLastRun() method.
      * @param stage the stage on which to display the GUI.
      */
-    public void scraperGUI(Stage stage, CourseScheduler cs) throws IOException {
+    public void scraperGUI(Stage stage, List<Course> courseList, Profile profile, CourseScheduler cs) throws IOException {
         //Set up stage, and elements of window.
         Button backButton = new Button("Back");
         backButton.setPrefSize(150, 60);
@@ -474,7 +488,7 @@ public class CourseScheduler extends Application {
 
         EventHandler<ActionEvent> backBtnPressed = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent scrapeReq) {
-                cs.profileGUI(stage);
+                cs.profileGUI(stage, courseList, cs);
             }
         };
 
