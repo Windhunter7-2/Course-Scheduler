@@ -237,7 +237,7 @@ public class Scraper {
 	/**
 	 * Drops all entries in the course table.
 	 */
-	private void dump() throws SQLException {
+	private void dump() throws SQLException, IOException {
 		Connection c = db.get();
 		c.createStatement().execute("DELETE FROM course;");
 	}
@@ -248,7 +248,7 @@ public class Scraper {
 	 * @param courses The courses to save.
 	 * @throws SQLException If something goes wrong saving the courses.
 	 */
-	void save(List<Course> courses) throws SQLException {
+	void save(List<Course> courses) throws SQLException, IOException {
 		StringBuilder builder = new StringBuilder();
 		builder.append("INSERT INTO course (code, name, number, type, credits, description, prereqs, coreqs, flag, parents) VALUES");
 		for (Course ignored : courses) {

@@ -52,7 +52,7 @@ public class ProfileDB {
 	/**
 	 * Creates the profiles' necessary information in the database.
 	 */
-	public ProfileDB create() throws SQLException {
+	public ProfileDB create() throws SQLException, IOException {
 		Connection connection = db.get();
 		Statement statement = connection.createStatement();
 		statement.execute(TABLE_CREATE_PROFILES);
@@ -66,7 +66,7 @@ public class ProfileDB {
 	/**
 	 * Creates the needed Courses necessary information in the database.
 	 */
-	private void createNeededCourses() throws SQLException {
+	private void createNeededCourses() throws SQLException, IOException {
 		Connection connection = db.get();
 		Statement statement = connection.createStatement();
 		statement.execute(TABLE_CREATE_NEEDED_COURSES);
@@ -75,7 +75,7 @@ public class ProfileDB {
 	/**
 	 * Creates the completed Courses necessary information in the database.
 	 */
-    private void createCompletedCourses() throws SQLException {
+    private void createCompletedCourses() throws SQLException, IOException {
 		Statement statement = db.get().createStatement();
 		statement.execute(TABLE_CREATE_DONE_COURSES);
 	}
@@ -86,7 +86,7 @@ public class ProfileDB {
 			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, name);
 			pstmt.executeUpdate();
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -100,7 +100,7 @@ public class ProfileDB {
 			while (res.next()) {
 				strs.add(res.getString(i));
 			}
-		} catch (SQLException throwables) {
+		} catch (SQLException | IOException throwables) {
 			throwables.printStackTrace();
 		}
 		return strs;
@@ -116,11 +116,10 @@ public class ProfileDB {
 	
 	private void setCoursesTable(String table, String profile, List<String> codes) {
     	if (codes.isEmpty()) {
-			StringBuilder sql = new StringBuilder("DELETE FROM " + table + ";");
 			try (Connection conn = db.get();
-				 PreparedStatement st = conn.prepareStatement(sql.toString())) {
+				 PreparedStatement st = conn.prepareStatement("DELETE FROM " + table + ";")) {
 				st.execute();
-			} catch (SQLException e) {
+			} catch (SQLException | IOException e) {
 				e.printStackTrace();
 			}
     		return;
@@ -139,12 +138,12 @@ public class ProfileDB {
 				st.setString(i, profile);
 				st.setString(i, code);
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public List<String> getNeededCourses(String profile) throws SQLException {
+	public List<String> getNeededCourses(String profile) throws SQLException, IOException {
 		List<String> neededCourses = new ArrayList<>();
 		String sql = "SELECT code FROM needed_courses WHERE user_name = ?;";
 		PreparedStatement statement = db.get().prepareStatement(sql);
@@ -157,7 +156,7 @@ public class ProfileDB {
 		return neededCourses;
 	}
 	
-	public List<String> getDoneCourses(String profile) throws SQLException {
+	public List<String> getDoneCourses(String profile) throws SQLException, IOException {
 		List<String> doneCourses = new ArrayList<>();
 		String sql = "SELECT code FROM done_courses WHERE user_name = ?;";
 		PreparedStatement statement = db.get().prepareStatement(sql);
