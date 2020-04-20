@@ -279,7 +279,7 @@ public class Scraper {
 	}
 
 	public LocalDateTime getLastRun() throws IOException {
-		LocalDateTime timeLastRun = LocalDateTime.now();
+		LocalDateTime timeLastRun = LocalDateTime.now().minusYears(1);
 		File dateFile = LocalStorage.get("dateLastRun.txt");
 		String line = "";
 		try {
