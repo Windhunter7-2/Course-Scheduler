@@ -43,8 +43,8 @@ public class RunAlgorithm {
 
     /**
      * Sets all the Courses from the given list as the Courses for every index after 0 in adjacencyList,
-     * as well as calls setPrereqCounts() to set the “level” counts for all those courses.
-     * It then adds a root “Graduation” Course at index 0, and for its prerequisites,
+     * as well as calls setPrereqCounts() to set the "level" counts for all those courses.
+     * It then adds a root "Graduation" Course at index 0, and for its prerequisites,
      * gives all the other Courses in the adjacencyList. It also initializes orderedCourseList,
      * to have the same number of slots as the length of List<Course>, and initializes those slots to null.
      * In addition, it also initiates orderedListCount to start as 0.
@@ -52,7 +52,7 @@ public class RunAlgorithm {
      */
 	public void setNodesList(List<Course> courseList) {
 		courseList = courseList.stream().map(Course::new).collect(Collectors.toList());
-		
+
 		//Initialize adjacencyList and coursePrereqCounts
 	    this.adjacencyList = new Course[courseList.size() + 1];
 	    this.coursePrereqCounts = new int[courseList.size() + 1];
@@ -89,7 +89,7 @@ public class RunAlgorithm {
 	 * as well as calling convertFlags(), and then running a loop (Until totalCount equals 0),
 	 * and for each iteration of the loop, running getPrereq(adjacencyList[0]).
 	 * *After* the loop finishes, it then shortens orderedCourseList to no longer include the
-	 * “nulls” at the end of the array.
+	 * "nulls" at the end of the array.
 	 */
 	public Course[] runAlgorithm(List<Course> courseList) {
 		this.setNodesList(courseList);
@@ -131,7 +131,7 @@ public class RunAlgorithm {
 		}
 		return index;
 	}
-	
+
 	/**
 	 * Takes a String form flag, and returns a version of that String with it rearranged from alternate forms to proper
 	 * (A|B...)&(C|D...)... form, using propositional logic. For example, A|(B&C) would turn into (A|B)&(A|C)
@@ -143,17 +143,17 @@ public class RunAlgorithm {
 		//If No Parentheses, Return As-Is
 		if ( (!originalFlag.contains("(")) && (!originalFlag.contains(")")) )
 			return originalFlag;
-		
+
 		//Convert from DNF to CNF
 		DnfToCnf converter = new DnfToCnf();
 		String CNF_Form = converter.rearrangeString(originalFlag);
-		
+
 		//Set Up Duplicate Handler
 		DnfToCnf duplicateHandler = new DnfToCnf();
 		String withDuplicates = duplicateHandler.stringReplacerA(CNF_Form);
 		withDuplicates = withDuplicates.replaceAll(" or ", "#");
 		withDuplicates = withDuplicates.replaceAll(" and ", "&");
-		
+
 		//Loop Through and Remove Duplicates
 		String withoutDuplicates = "";
 		int currentChar = 0;
@@ -163,18 +163,18 @@ public class RunAlgorithm {
 			//End of String; Break
 			if (withDuplicates.length() == currentChar)
 				break;
-			
+
 			//Get Current Character
 			char tempC = withDuplicates.charAt(currentChar);
 			char nextC = withDuplicates.charAt(currentChar);
 			if ( withDuplicates.length() > (currentChar + 1) )
 				nextC = withDuplicates.charAt(currentChar + 1);
-			
+
 			//If Not A->Z, Add to withoutDuplicates Only
 			int isLetter = (int) tempC;
 			if (isLetter < 65)
 				withoutDuplicates = (withoutDuplicates + tempC);
-			
+
 			//Is a Letter; if in Duplicates, Remove (And Remove Next #)
 			else
 			{
@@ -195,7 +195,7 @@ public class RunAlgorithm {
 			}
 			currentChar++;
 		}
-		
+
 		//Refine: Remove Excess #'s, and Rereplace #'s with |'s Again
 		String refined = "";
 		String remainder = withoutDuplicates;
@@ -205,10 +205,10 @@ public class RunAlgorithm {
 			//End of String; Break
 			if (withoutDuplicates.length() == currentChar)
 				break;
-			
+
 			//Get Current Character
 			char tempC = withoutDuplicates.charAt(currentChar);
-			
+
 			//Skip Excess #'s
 			String tempS = remainder.replaceAll("&", "");
 			tempS = tempS.replaceAll("#", "");
@@ -216,7 +216,7 @@ public class RunAlgorithm {
 			tempS = tempS.replaceAll("\\)", "");
 			if ( tempS.isEmpty() && ((tempC == '&') || (tempC == '#')) )
 				break;
-			
+
 			//Add Character to refined
 			refined = (refined + tempC);
 			remainder = remainder.substring(1);
@@ -224,7 +224,7 @@ public class RunAlgorithm {
 		}
 		//Rereplacement
 		refined = refined.replaceAll("#", "|");
-		
+
 		//Return
 		return refined;
 	}
@@ -240,24 +240,24 @@ public class RunAlgorithm {
 		//If No Parentheses, Return As-Is
 		if ( (!originalFlag.contains("(")) && (!originalFlag.contains(")")) )
 			return originalFlag;
-		
+
 		//Variables
 		Stack<Character> open = new Stack<Character>();	//Opening Parentheses
 		String compare = "";	//The Current Set Inside the Parentheses
 		String newFlag = "";	//New Flag
 		int currentChar = 0;	//Current Position in String
 		boolean removing = false;	//Set to True When in the Process of Removing an )
-		
+
 		//Continue Through String
 		while (true)
 		{
 			//End of String; Break
 			if (originalFlag.length() == currentChar)
 				break;
-			
+
 			//Get Current Character
 			char tempC = originalFlag.charAt(currentChar);
-			
+
 			//If (, Put on Stack open and Do Checks
 			if (tempC == '(')
 			{
@@ -268,7 +268,7 @@ public class RunAlgorithm {
 					removing = true;
 				}
 			}
-			
+
 			//If ), Pop open and Move compare to newFlag
 			else if (tempC == ')')
 			{
@@ -282,7 +282,7 @@ public class RunAlgorithm {
 				newFlag = (newFlag + parenth + compare + tempC);
 				compare = "";
 			}
-			
+
 			//If Non-Parentheses, Add to compare
 			else
 			{
@@ -321,19 +321,19 @@ public class RunAlgorithm {
 		for (int i = 0; i < 26; i++)
 			orNumbers[i] = 0;	//0 for No Ors, 1 for Or#1, 2 for Or#2, etc.
 		int orthNumber = 1;	//Which Or the Current Or Is, e.g. Or#1, etc.
-		
+
 		//If No Parentheses, Add Parentheses
 		if ( (!originalFlag.contains("(")) && (!originalFlag.contains(")")) && (!originalFlag.isEmpty()) )
 			originalFlag = ("(" + originalFlag + ")");
-		
+
 		//If No Ors & Has Corequisite, Return -9999
 		if ( (!originalFlag.contains("|")) && (!adjacencyList[index].getCoreqs().isEmpty()) )
 			return -9999;
-		
+
 		//If Empty Or No Ors, Return As-Is
 		if ( (originalFlag.isEmpty()) || (!originalFlag.contains("|")) )
 			return 0;
-		
+
 		//Pre-Set Up String to Proper Format
 		DnfToCnf converter = new DnfToCnf();
 		String onlyLetters = converter.stringReplacerA(originalFlag);
@@ -342,7 +342,7 @@ public class RunAlgorithm {
 
 		//At Least One Or Found; Set Parent Flag
 		newFlag = 1000;
-		
+
 		//Corequisites
 		if (!adjacencyList[index].getCoreqs().isEmpty())
 			newFlag *= -1;
@@ -353,7 +353,7 @@ public class RunAlgorithm {
 			//End of String; Break
 			if (onlyLetters.length() == currentChar)
 				break;
-			
+
 			//Get Current Character
 			char tempC = onlyLetters.charAt(currentChar);
 			char nextC = onlyLetters.charAt(currentChar);
@@ -362,11 +362,11 @@ public class RunAlgorithm {
 			char prevC = onlyLetters.charAt(currentChar);
 			if (currentChar > 0)
 				prevC = onlyLetters.charAt(currentChar - 1);
-			
+
 			//If ), Increment orthNumber
 			if (tempC == ')')
 				orthNumber++;
-			
+
 			//If A->Z, Increment orNumber for That Course
 			int isLetter = (int) tempC;
 			if (! ( (isLetter < 65) || (isLetter > 90) ) )
@@ -379,7 +379,7 @@ public class RunAlgorithm {
 			}
 			currentChar++;
 		}
-		
+
 		//Add to Child Flags
 		for (int i = 0; i < converter.originalString.size(); i++)
 		{
@@ -389,7 +389,7 @@ public class RunAlgorithm {
 			int newChildFlag = ( oldChildFlag + (orNumbers[i] * 10) );
 			adjacencyList[indexChild].setFlag(newChildFlag);
 		}
-		
+
 		//Remove Excess Prerequisites
 		adjacencyList[index].getPrerequisites().clear();
 		for (int i = 0; i < converter.originalString.size(); i++)
@@ -397,11 +397,11 @@ public class RunAlgorithm {
 			String name = converter.originalString.get(i);
 			adjacencyList[index].getPrerequisites().add(name);
 		}
-		
+
 		//Standard Return
 		return newFlag;
 	}
-	
+
 	/**
 	 * This converts all of the String versions of the flags to integer representations for use in the algorithm.
 	 */
@@ -410,7 +410,7 @@ public class RunAlgorithm {
 		//Initialize All adjacencyList Flags to 0
 		for (int i = 1; i < adjacencyList.length; i++)
 			adjacencyList[i].setFlag(0);
-		
+
 		//Loop Through and Set Flags
 		for (int i = 1; i < adjacencyList.length; i++)
 		{
@@ -438,7 +438,7 @@ public class RunAlgorithm {
 		else
 			return -1;
 	}
-	
+
 	/**
 	 * This takes a flag and, if it's an or child flag, returns *which* or child flag it is. Otherwise, it returns -1.
 	 * @param flag The flag to check
@@ -461,7 +461,7 @@ public class RunAlgorithm {
 		else
 			return -1;
 	}
-	
+
 	/**
 	 * This takes a flag and, if it's a corequisite flag, returns -1. Otherwise, it returns 1. (Or 0 for the 0 flag)
 	 * @param flag
@@ -478,7 +478,7 @@ public class RunAlgorithm {
 			newFlag = 1;
 		return newFlag;
 	}
-	
+
 	/**
 	 * This is a helper method for getPrereq() that specifically is for dealing with the various flags. (AKA for different
 	 * flags, this method is for the conditionals of the different flags, to return the Course most likely to be chosen,
@@ -498,7 +498,7 @@ public class RunAlgorithm {
 		Course childCourseB = null;
 		int childIndexA = -1;
 		int childIndexB = -1;
-		
+
 		//Convert Strings to Courses/Indices
 		for (int i = 0; i < adjacencyList.length; i++)
 		{
@@ -514,11 +514,11 @@ public class RunAlgorithm {
 				childIndexB = i;
 			}
 		}
-		
+
 		//Case for childA = childB
 		if ( childA.equals(childB) )
 			return childIndexA;
-		
+
 		//Case for Handling "null"
 		if ( (childA.equals("null")) || (childCourseA == null) )
 		{
@@ -529,7 +529,7 @@ public class RunAlgorithm {
 		}
 		else if ( (childB.equals("null")) || (childCourseB == null) )
 			return childIndexA;
-		
+
 		//Corequisite Flag
 		if ( (parentFlag < -1) && (numPrereqs == 1) )
 		{
@@ -538,7 +538,7 @@ public class RunAlgorithm {
 			else
 				return childIndexB;
 		}
-		
+
 		//ALL Other Flags
 		int flagA = childCourseA.getFlag();
 		int flagB = childCourseB.getFlag();
@@ -563,7 +563,7 @@ public class RunAlgorithm {
 			return childIndexA;
 		int countA = coursePrereqCounts[childIndexA];
 		int countB = coursePrereqCounts[childIndexB];
-		
+
 		//Standard And Flag
 		if ( (parentFlag == 0) || (Math.abs(parentFlag) == 9999) )
 		{
@@ -579,7 +579,7 @@ public class RunAlgorithm {
 			else
 				returnedChildIndex = childIndexB;
 		}
-		
+
 		//Check for Count of 0 (And Enable Compatibility with Ors Still)
 		if (coursePrereqCounts[childIndexA] == 0)
 		{
@@ -607,7 +607,7 @@ public class RunAlgorithm {
 				else if (isParentFlagB == -1)
 					countA = -1;
 			}
-			
+
 			//Pick Left Child
 			if (countA < countB)
 			{
@@ -617,7 +617,7 @@ public class RunAlgorithm {
 				if ( (isChildFlagA == isChildFlagB) && (!childA.equals(childB)) )
 					adjacencyList[parentIndex].getPrerequisites().remove(childB);
 			}
-			
+
 			//Pick Right Child
 			else
 			{
@@ -630,11 +630,11 @@ public class RunAlgorithm {
 			//Reset the Flags (If Needed)
 			flagCheck(parentIndex);
 		}
-		
+
 		//Standard Return
 		return returnedChildIndex;
 	}
-	
+
 	/**
 	 * This is a helper method for getPrereq(). It lowers the count of the current Course.
 	 * @param indexOfChild The index of the Course to lower the count of
@@ -645,7 +645,7 @@ public class RunAlgorithm {
 		//For Errors
 		if (indexOfChild == -1)
 			return;
-		
+
 		//"Lower Count" (Actual Lowering Done in Main Part of getPrereq())
 		if ( !removedCourses.contains(adjacencyList[indexOfChild]) )
 			removedCourses.add(adjacencyList[indexOfChild]);
@@ -654,12 +654,12 @@ public class RunAlgorithm {
 			if ( adjacencyList[indexOfParent].getPrerequisites().contains(adjacencyList[indexOfChild].getName()) )
 				adjacencyList[indexOfParent].getPrerequisites().remove( adjacencyList[indexOfChild].getName() );
 		}
-		
+
 		//Special Alt Case for Graduation
 		if (indexOfParent == -1)
 			return;
 	}
-	
+
 	/**
 	 * This is a helper method for getPrereq_flagHelper(). It checks if the parent flag needs to be changed, and if so, changes it.
 	 * @param indexOfParent The index of the parent Course
@@ -674,7 +674,7 @@ public class RunAlgorithm {
 		int maxFlag = 0;
 		boolean moreOrFlags = false;
 		List<Integer> orFlags = new ArrayList<Integer>();
-		
+
 		//Find "Max" Flag (AKA Or Flag -> Corequisite Flag -> And Flag
 		for (int i = 0; i < parentCourse.getPrerequisites().size(); i++)
 		{
@@ -718,7 +718,7 @@ public class RunAlgorithm {
 		}
 		setFlag(parentCourse, maxFlag);
 	}
-	
+
 	/**
 	 * This is the main portion of the algorithm. It does a depth-first traversal on the given Course, adds that Course to
 	 * orderedCourseList, and "removes" it from adjacencyList via lowering the "count" to below 1.
@@ -787,7 +787,7 @@ public class RunAlgorithm {
 			//Return from Graduation Course so runAlgorithm() Can Run It Again
 			return null;
 		}
-		
+
 		//Set Variables
 		int parentIndex = courseToIndex(recursCourse.getName());
 		int parentFlag = getFlag(recursCourse);
@@ -796,7 +796,7 @@ public class RunAlgorithm {
 		int indexChosen = -1;
 		int numPrereqs = recursCourse.getPrerequisites().size();
 		List<String> prereqs = recursCourse.getPrerequisites();
-		
+
 		//Loop Through to Find Appropriate Course
 		childA = prereqs.get(0);
 		if (prereqs.size() > 1)
@@ -825,7 +825,7 @@ public class RunAlgorithm {
 		}
 		if (indexChosen == -1)	//For if the Course Isn't Needed
 			return null;
-		
+
 		//No Children Left; Base Case
 		List<String> childPrereqs = adjacencyList[indexChosen].getPrerequisites();
 		if ( childPrereqs.isEmpty() )
@@ -843,11 +843,11 @@ public class RunAlgorithm {
 			lowerCount(indexChosen, parentIndex);
 			return adjacencyList[indexChosen];
 		}
-		
+
 		//Children Left; Recursive Case
 		else if ( !childPrereqs.isEmpty() )
 			getPrereq(adjacencyList[indexChosen]);
-		
+
 		//Return Statement for Errors
 		return null;
 	}
@@ -898,6 +898,7 @@ public class RunAlgorithm {
 	 * This runs setPrereqCount(int) for every Course in adjacencyList; during this iteration, for any Courses that
 	 * already have a count listed in coursePrereqCounts, it does *not* run setPrereqCount(int) for that Course. This
 	 * method also makes totalCount the sum of coursePrereqCounts.
+	 */
 	private void setPrereqCounts() {
 		//Track totalCount as we step through Courses.
 		totalCount = 0;
