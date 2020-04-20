@@ -24,7 +24,7 @@ dependencies {
 
 application {
     // Define the main class for the application
-    mainClassName = 'CourseScheduler.App'
+    mainClassName = 'CourseScheduler.CourseScheduler'
 }
 
 jar {

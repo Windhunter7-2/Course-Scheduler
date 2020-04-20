@@ -1,5 +1,6 @@
 package CourseScheduler;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,12 +11,11 @@ import java.util.List;
 
 public class ProfileDB {
 	
-	private Database profiledb;
-	Connection connection;
+	private Database db;
 	
-	public ProfileDB() {
-		profiledb = new Database("user_profiles");
-		connection = profiledb.get();
+	public ProfileDB() throws IOException, SQLException {
+		db = new Database("user_profiles");
+		db.create();
 	}
 	
 	private static final String PROFILES_TABLE = "profiles";
@@ -53,6 +53,7 @@ public class ProfileDB {
 	 * Creates the profiles' necessary information in the database.
 	 */
 	public ProfileDB create() throws SQLException {
+		Connection connection = db.get();
 		Statement statement = connection.createStatement();
 		statement.execute(TABLE_CREATE_PROFILES);
 		
@@ -66,6 +67,7 @@ public class ProfileDB {
 	 * Creates the needed Courses necessary information in the database.
 	 */
 	private void createNeededCourses() throws SQLException {
+		Connection connection = db.get();
 		Statement statement = connection.createStatement();
 		statement.execute(TABLE_CREATE_NEEDED_COURSES);
 	}
@@ -74,13 +76,13 @@ public class ProfileDB {
 	 * Creates the completed Courses necessary information in the database.
 	 */
     private void createCompletedCourses() throws SQLException {
-		Statement statement = connection.createStatement();
+		Statement statement = db.get().createStatement();
 		statement.execute(TABLE_CREATE_DONE_COURSES);
 	}
 	
 	public void insertProfile(String name) {
 		String sql = "INSERT OR IGNORE INTO profiles(user_name) VALUES(?);";
-		try (Connection conn = connection;
+		try (Connection conn = db.get();
 			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, name);
 			pstmt.executeUpdate();
@@ -92,9 +94,9 @@ public class ProfileDB {
 	public List<String> getProfiles() {
     	String sql = "SELECT user_name FROM profiles;";
 		List<String> strs = new ArrayList<>();
-		try (Connection conn = connection; PreparedStatement st = conn.prepareStatement(sql)) {
+		try (Connection conn = db.get(); PreparedStatement st = conn.prepareStatement(sql)) {
 			ResultSet res = st.executeQuery();
-			int i = 0;
+			int i = 1;
 			while (res.next()) {
 				strs.add(res.getString(i));
 			}
@@ -120,7 +122,7 @@ public class ProfileDB {
 		sql.insert(sql.lastIndexOf(","), ";");
 		
 		int i = 1;
-		try (Connection conn = connection;
+		try (Connection conn = db.get();
 			 PreparedStatement st = conn.prepareStatement(sql.toString())) {
 			for (String code : codes) {
 				st.setString(i, profile);
@@ -134,7 +136,7 @@ public class ProfileDB {
 	public List<String> getNeededCourses(String profile) throws SQLException {
 		List<String> neededCourses = new ArrayList<>();
 		String sql = "SELECT code FROM needed_courses WHERE user_name = ?;";
-		PreparedStatement statement = connection.prepareStatement(sql);
+		PreparedStatement statement = db.get().prepareStatement(sql);
 		statement.setString(1, profile);
 		ResultSet rs = statement.executeQuery();
 		while (rs.next()) {
@@ -147,7 +149,7 @@ public class ProfileDB {
 	public List<String> getDoneCourses(String profile) throws SQLException {
 		List<String> doneCourses = new ArrayList<>();
 		String sql = "SELECT code FROM done_courses WHERE user_name = ?;";
-		PreparedStatement statement = connection.prepareStatement(sql);
+		PreparedStatement statement = db.get().prepareStatement(sql);
 		statement.setString(1, profile);
 		ResultSet rs = statement.executeQuery();
         while (rs.next()) {
