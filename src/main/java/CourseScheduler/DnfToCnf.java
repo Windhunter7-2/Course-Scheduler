@@ -1,3 +1,4 @@
+package CourseScheduler;
 /**
  * This code is mainly created by ldkrsi, and is from https://github.com/ldkrsi/cnf_java
  * The modified parts are where the javadocs are, everything else is originally made by ldkrsi.
