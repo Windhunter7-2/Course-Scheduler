@@ -4,14 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class LocalStorage {
-	
-	private String name;
 	
 	/**
 	 * Retrieves a storage file in the user's appdata/CourseScheduler folder.

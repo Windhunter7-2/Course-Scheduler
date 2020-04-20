@@ -146,23 +146,20 @@ public class ProfileDB {
 	public List<String> getNeededCourses(String profile) throws SQLException, IOException {
 		List<String> neededCourses = new ArrayList<>();
 		String sql = "SELECT code FROM needed_courses WHERE user_name = ?;";
-		PreparedStatement statement = db.get().prepareStatement(sql);
-		statement.setString(1, profile);
-		ResultSet rs = statement.executeQuery();
-		while (rs.next()) {
-			String str1 = rs.getString("code");
-			neededCourses.add(str1);
-		}
-		return neededCourses;
+		return getStrings(profile, neededCourses, sql);
 	}
 	
 	public List<String> getDoneCourses(String profile) throws SQLException, IOException {
 		List<String> doneCourses = new ArrayList<>();
 		String sql = "SELECT code FROM done_courses WHERE user_name = ?;";
+		return getStrings(profile, doneCourses, sql);
+	}
+	
+	private List<String> getStrings(String profile, List<String> doneCourses, String sql) throws SQLException, IOException {
 		PreparedStatement statement = db.get().prepareStatement(sql);
 		statement.setString(1, profile);
 		ResultSet rs = statement.executeQuery();
-        while (rs.next()) {
+		while (rs.next()) {
 			String str1 = rs.getString("code");
 			doneCourses.add(str1);
 		}

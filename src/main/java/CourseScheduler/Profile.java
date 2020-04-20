@@ -72,7 +72,6 @@ public class Profile {
 	 */
 	public void setNumSemesters(int semesters) {
 		this.numSemesters = semesters;
-		
 	}
 	
 	/**
