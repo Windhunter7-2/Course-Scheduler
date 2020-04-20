@@ -314,11 +314,11 @@ public class CourseScheduler extends Application {
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
                         if(param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().add(param.getValue());
-//                            Profile.user_profiles.insertDoneCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getDone().add(param.getValue().course.getCode());
                         }
                         else if(!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().remove(param.getValue());
-//                            Profile.user_profiles.deleteDoneCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getDone().remove(param.getValue().course.getCode());
                         }
                         return param.getValue().done;
                     }

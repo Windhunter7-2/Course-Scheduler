@@ -156,15 +156,15 @@ public class ProfileDB {
 		return getStrings(profile, doneCourses, sql);
 	}
 	
-	private List<String> getStrings(String profile, List<String> doneCourses, String sql) throws SQLException, IOException {
+	private List<String> getStrings(String profile, List<String> courses, String sql) throws SQLException, IOException {
 		PreparedStatement statement = db.get().prepareStatement(sql);
 		statement.setString(1, profile);
 		ResultSet rs = statement.executeQuery();
 		while (rs.next()) {
-			String str1 = rs.getString("code");
-			doneCourses.add(str1);
+			String code = rs.getString("code");
+			courses.add(code);
 		}
-		return doneCourses;
+		return courses;
 	}
 	
 }

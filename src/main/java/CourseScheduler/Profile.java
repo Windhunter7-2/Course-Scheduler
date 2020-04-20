@@ -101,4 +101,16 @@ public class Profile {
 		return done;
 	}
 	
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Profile{");
+		sb.append("name='").append(name).append('\'');
+		sb.append(", needed=").append(needed);
+		sb.append(", done=").append(done);
+		sb.append(", numCredits=").append(numCredits);
+		sb.append(", numSemesters=").append(numSemesters);
+		sb.append('}');
+		return sb.toString();
+	}
+	
 }
