@@ -66,7 +66,7 @@ public class CourseScheduler extends Application {
             courses.add(test1);
             courses.add(test2);
             courses.add(test3);
-            checkListGUI(courses, new Profile("Jack"), primaryStage, this);
+            checkListGUI(courses, Profile.load("Jack"), primaryStage, this);
         } catch(Exception e) {
             //Basic Exception catch for now - will expand later.
             e.printStackTrace();
@@ -106,6 +106,7 @@ public class CourseScheduler extends Application {
                 System.out.println(profilenames);
                 td.showAndWait();
                 //creates profile object from the Profile class
+                // TODO help
                 createProfile(td.getEditor().getText());
                 selectprofile.getItems().add(td.getEditor().getText());
             }
@@ -143,10 +144,8 @@ public class CourseScheduler extends Application {
      * creates a new profile.
      * @param name name of the user
      */
-    public void createProfile(String name){
-        Profile newprofile = new Profile(name);
-        newprofile.insertProfileTable();
-        System.out.println("this is my profile name "+ newprofile.getName());
+    public void createProfile(String name) throws SQLException {
+        Profile newprofile = Profile.load(name);
     }
     /**
      * loads a profile from the database.
@@ -221,8 +220,8 @@ public class CourseScheduler extends Application {
                         courseList.get(i),
                         /*profile.getNeededCourses().contains(courseList.get(i).getCode()),
                         profile.getDoneCourses().contains(courseList.get(i).getCode())));*/
-                        profile.getNeededCourses().contains(courseList.get(i).getCode()),
-                        profile.getDoneCourses().contains(courseList.get(i).getCode())));
+                        profile.getNeeded().contains(courseList.get(i).getCode()),
+                        profile.getDone().contains(courseList.get(i).getCode())));
             }
         }
         return helperList;
@@ -329,11 +328,11 @@ public class CourseScheduler extends Application {
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
                         if(param.getValue().isReqd() && !neededList.getItems().contains(param.getValue())) {
                             neededList.getItems().add(param.getValue());
-                            Profile.user_profiles.insertNeededCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getNeeded().add(param.getValue().course.getCode());
                         }
                         else if(!param.getValue().isReqd() && neededList.getItems().contains(param.getValue())) {
                             neededList.getItems().remove(param.getValue());
-                            Profile.user_profiles.deleteNeededCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getNeeded().remove(param.getValue().course.getCode());
                         }
                         return param.getValue().reqd;
                     }
@@ -416,33 +415,16 @@ public class CourseScheduler extends Application {
         saveButton.setPrefSize(150, 40);
         saveButton.setStyle("-fx-font-size:15");
         saveButton.setOnAction(e -> {
-            profile.neededCourses = new ArrayList<String>();
-            profile.doneCourses = new ArrayList<String>();
-            for(int i = 0; i < helperList.size(); i++) {
-                if(helperList.get(i).reqd.getValue() && !profile.neededCourses.contains(helperList.get(i))) {
-                    profile.neededCourses.add(helperList.get(i).course.getCode());
-                    Profile.user_profiles.insertNeededCourses(profile.getID(), helperList.get(i).course.getCode());
-                } else if(!helperList.get(i).reqd.getValue() && profile.neededCourses.contains(helperList.get(i))) {
-                    profile.neededCourses.remove(helperList.get(i).course.getCode());
-                    Profile.user_profiles.deleteNeededCourses(profile.getID(), helperList.get(i).course.getCode());
-                }
-                if(helperList.get(i).done.getValue() && !profile.doneCourses.contains(helperList.get(i))) {
-                    profile.doneCourses.add(helperList.get(i).course.getCode());
-                    Profile.user_profiles.insertDoneCourses(profile.getID(), helperList.get(i).course.getCode());
-                } else if(!helperList.get(i).done.getValue() && profile.doneCourses.contains(helperList.get(i))) {
-                    profile.doneCourses.remove(helperList.get(i).course.getCode());
-                    Profile.user_profiles.deleteDoneCourses(profile.getID(), helperList.get(i).course.getCode());
-                }
-            }
+            profile.save();
             if(!creditsTextBox.getText().equals("")) {
-                profile.numcredits = Integer.parseInt(creditsTextBox.getText().replaceAll("[^\\d]", ""));
+                profile.setNumCredits(Integer.parseInt(creditsTextBox.getText().replaceAll("[^\\d]", "")));
             } else {
-                profile.numcredits = 15;
+                profile.setNumCredits(15);
             }
             if(!semestersTextBox.getText().equals("")) {
-                profile.numsemesters = Integer.parseInt(semestersTextBox.getText().replaceAll("[^\\d]", ""));
+                profile.setNumSemesters(Integer.parseInt(semestersTextBox.getText().replaceAll("[^\\d]", "")));
             } else {
-                profile.numsemesters = 8;
+                profile.setNumSemesters(8);
             }
         });
         VBox optionsVBox = new VBox();

@@ -6,102 +6,44 @@ import java.util.List;
 
 public class Profile {
 	
-	public static ProfileDB user_profiles;
+	public static ProfileDB db;
 	
-	private static int user_id = 0;
-	String name;
-	int numcredits;
-	int numsemesters;
-	ArrayList<String> neededCourses;
-	ArrayList<String> doneCourses;
+	private final String name;
+	private final List<String> needed;
+	private final List<String> done;
+	private int numCredits;
+	private int numSemesters;
 	
-	public Profile(String Name) {
-		name = Name;
-		
-		numcredits = 18;
-		numsemesters = 8;
-		user_id++;
-		
-		neededCourses = new ArrayList<String>(); //Jack added this and the below line to aid CourseScheduler.checkListGUI()
-		doneCourses = new ArrayList<String>();
-	}
-	
-	/**
-	 * sets the user's profile name
-	 *
-	 * @param name user's name
-	 */
-	public void setName(String name) {
+	private Profile(String name) {
 		this.name = name;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	/**
-	 * insersts a profile into the table of profiles in profileDB.
-	 */
-	public void insertProfileTable() {
-		user_profiles.insertProfile(name);
+		
+		numCredits = 18;
+		numSemesters = 8;
+		
+		needed = new ArrayList<>(); //Jack added this and the below line to aid CourseScheduler.checkListGUI()
+		done = new ArrayList<>();
 	}
 	
 	/**
-	 * inserts graduation courses associated with user id
+	 * Loads a Profile with the given name, or creates it if it doesn't exist.
 	 *
-	 * @param code course code
+	 * @param name The name of the profile
+	 * @return A fully initialized Profile instance
 	 */
-	public void insertMyGradCoursesTable(String code) {
-		user_profiles.insertMyGradCourses(getID(), code);
+	public static Profile load(String name) throws SQLException {
+		db.insertProfile(name);
+		Profile profile = new Profile(name);
+		profile.needed.addAll(db.getNeededCourses(name));
+		profile.done.addAll(db.getDoneCourses(name));
+		return profile;
 	}
 	
 	/**
-	 * inserts done courses associated with user id
-	 *
-	 * @param /*id each user has an id
-	 * @param code course code
+	 * Saves this profile back to the database, committing any changes made.
 	 */
-	public void insertNeededCoursesTable(/*int id,*/ String code) {
-		user_profiles.insertNeededCourses(getID(), code);
-	}
-	
-	/**
-	 * inserts done courses associated with user id
-	 *
-	 * @param /*id each user has an id
-	 * @param code course code
-	 */
-	public void insertDoneCoursesTable(/*int id,*/ String code) {
-		user_profiles.insertDoneCourses(getID(), code);
-	}
-	
-	/**
-	 * delete mygrad  courses associated with user id
-	 *
-	 * @param /*id each user has an id
-	 * @param code course code
-	 */
-	public void deleteMyGradCoursesTable(/*int id,*/ String code) {
-		user_profiles.deleteDoneCourses(getID(), code);
-	}
-	
-	/**
-	 * delete needed courses associated with user id
-	 *
-	 * @param code course code
-	 */
-	public void deleteNeededCoursesTable(/*int id,*/ String code) {
-		user_profiles.deleteDoneCourses(getID(), code);
-	}
-	
-	/**
-	 * delete done courses associated with user id
-	 *
-	 * @param /*id each user has an id
-	 * @param code course code
-	 */
-	public void deleteDoneCoursesTable(/*int id,*/ String code) {
-		user_profiles.deleteDoneCourses(getID(), code);
+	public void save() {
+		db.setDoneCourses(this.name, this.done);
+		db.setNeededCourses(this.name, this.needed);
 	}
 	
 	/**
@@ -110,7 +52,7 @@ public class Profile {
 	 * @param credits overall credits.
 	 */
 	public void setNumCredits(int credits) {
-		this.numcredits = credits;
+		this.numCredits = credits;
 	}
 	
 	/**
@@ -118,8 +60,8 @@ public class Profile {
 	 *
 	 * @return numcredits
 	 */
-	public int getNumcredits() {
-		return numcredits;
+	public int getNumCredits() {
+		return numCredits;
 	}
 	
 	/**
@@ -128,7 +70,7 @@ public class Profile {
 	 * @param semesters numsemesters
 	 */
 	public void setNumSemesters(int semesters) {
-		this.numsemesters = semesters;
+		this.numSemesters = semesters;
 		
 	}
 	
@@ -138,29 +80,7 @@ public class Profile {
 	 * @return number of semesters.
 	 */
 	public int getNumSemesters() {
-		return numsemesters;
-	}
-	
-	/**
-	 * adds new courses to needed list
-	 *
-	 * @param course course to add
-	 * @return list of needed courses.
-	 */
-	public List<String> addNeededCourses(String course) {
-		neededCourses.add(course);
-		return neededCourses;
-	}
-	
-	/**
-	 * adds done courses to done list
-	 *
-	 * @param course course to add
-	 * @return list of done courses.
-	 */
-	public List<String> addDoneCourses(String course) {
-		doneCourses.add(course);
-		return doneCourses;
+		return numSemesters;
 	}
 	
 	/**
@@ -168,9 +88,8 @@ public class Profile {
 	 *
 	 * @return neededcourses
 	 */
-	public List<String> getNeededCourses() throws SQLException {
-		neededCourses = user_profiles.getNeededCourses(getID());
-		return neededCourses;
+	public List<String> getNeeded() {
+		return needed;
 	}
 	
 	/**
@@ -178,17 +97,8 @@ public class Profile {
 	 *
 	 * @return donecourses
 	 */
-	public List<String> getDoneCourses() throws SQLException {
-		doneCourses = user_profiles.getDoneCourses(getID());
-		return doneCourses;
+	public List<String> getDone() {
+		return done;
 	}
 	
-	/**
-	 * gets this profile's ID
-	 *
-	 * @return user_id
-	 */
-	public int getID() {
-		return user_id;
-	}
 }
