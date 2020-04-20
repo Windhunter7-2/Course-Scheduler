@@ -401,7 +401,11 @@ public class CourseScheduler extends Application {
             for(int i = 0; i < newNeededHelpers.size(); i++) {
                 neededCourseList.add(getCourseByCode(courseList, profile.getNeeded().get(i)));
             }
-            generateSchedule(neededCourseList, profile.getNumCredits(), profile.getNumSemesters());
+            List<Course> doneCourseList = new ArrayList<>();
+            for(int i = 0; i < newDoneHelpers.size(); i++) {
+                neededCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
+            }
+            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters());
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
