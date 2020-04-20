@@ -589,6 +589,36 @@ public class CourseScheduler extends Application {
 		return returned;
     }
     
+    /**
+     * This starts with running the algorithm, passing in the given list as the parameter for runAlgorithm() in
+     * the RunAlgorithm class. It returns an *ordered* Course list, which, combined with the maximum number of
+     * credits and semesters (Gotten from the user’s Profile), respectively, are used as the parameters to call
+     * cutOffCalc(). This then returns an *ordered* list of Semesters, which is then displayed to the user. This
+     * displays the classes in a semesterly fashion, as part of a GUI, and in this GUI, the user can also click
+     * the "Back" button to go back to the previous step of the checklist (selectProfileInit()), or the "Home"
+     * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
+     */
+    public void generateSchedule(List<Course> neededCourses, int maxCredits, int maxSemesters)
+    {
+		//Algorithm
+		RunAlgorithm runAlg = new RunAlgorithm();
+		Course [] orderedList = runAlg.runAlgorithm(neededCourses);
+		List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
+		
+		//GUI Interaction
+    	for (int i = 0; i < orderedSemesters.size(); i++)
+    	{
+    		Semester tempS = orderedSemesters.get(i);
+    		for (int j = 0; j < tempS.getSemester().size(); j++)
+    		{
+    			Course tempC = tempS.getSemester().get(j);
+    			System.out.println("PUT CODE HERE FOR DISPLAYING THE COURSE");
+    		}
+    		System.out.println("PUT CODE HERE FOR SEPARATOR FOR THE DIFFERENT SEMESTERS");
+    	}
+    	
+    }
+    
     public static void main(String[] args) throws Exception {
         launch(args);
     }
