@@ -598,23 +598,22 @@ public class CourseScheduler extends Application {
     		}
     	}
     	
-	//Algorithm
-	RunAlgorithm runAlg = new RunAlgorithm();
-	Course [] orderedList = runAlg.runAlgorithm(neededCourses);
-	List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
-		
-	//GUI Interaction
-    	for (int i = 0; i < orderedSemesters.size(); i++)
-    	{
-    		Semester tempS = orderedSemesters.get(i);
-    		for (int j = 0; j < tempS.getSemester().size(); j++)
-    		{
-    			Course tempC = tempS.getSemester().get(j);
-    			System.out.println("PUT CODE HERE FOR DISPLAYING THE COURSE");
-    		}
-    		System.out.println("PUT CODE HERE FOR SEPARATOR FOR THE DIFFERENT SEMESTERS");
-    	}
-    	
+        //Algorithm
+        RunAlgorithm runAlg = new RunAlgorithm();
+        Course [] orderedList = runAlg.runAlgorithm(neededCourses);
+        List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
+            
+        //GUI Interaction
+        for (int i = 0; i < orderedSemesters.size(); i++)
+        {
+            Semester tempS = orderedSemesters.get(i);
+            for (int j = 0; j < tempS.getSemester().size(); j++)
+            {
+                Course tempC = tempS.getSemester().get(j);
+                System.out.println("PUT CODE HERE FOR DISPLAYING THE COURSE");
+            }
+            System.out.println("PUT CODE HERE FOR SEPARATOR FOR THE DIFFERENT SEMESTERS");
+        }
     }
     
     public static void main(String[] args) throws Exception {
