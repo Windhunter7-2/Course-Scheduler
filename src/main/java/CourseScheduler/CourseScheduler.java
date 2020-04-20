@@ -35,7 +35,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CourseScheduler extends Application {
 
     Stage stage;
@@ -113,7 +112,6 @@ public class CourseScheduler extends Application {
             }
         };
 
-
         selectprofile.getItems().add("Create New Profile");
         //selectprofile.setOnAction(e->createnewprofile(selectprofile));
         selectprofile.getItems().addAll(profileNames);
@@ -132,8 +130,6 @@ public class CourseScheduler extends Application {
         pane.getChildren().addAll(selectprofile);
         stage.setScene(new Scene(pane, 300, 275));
         stage.show();
-
-
     }
     
     //Helper method to update the display of the time last run once scraping is complete.

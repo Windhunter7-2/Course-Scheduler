@@ -37,7 +37,14 @@ public class Database {
 	 * @return A Connection to this database, which can be used to create statements and perform updates.
 	 */
 	public Connection get() {
-		return connection;
+		try {
+			return DriverManager.getConnection("jdbc:sqlite:" + createPath().toString());
+		} catch (SQLException throwables) {
+			throwables.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 }
