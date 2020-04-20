@@ -115,6 +115,11 @@ public class ProfileDB {
 	}
 	
 	private void setCoursesTable(String table, String profile, List<String> codes) {
+    	if (codes.isEmpty()) {
+    		// TODO clear
+    		return;
+		}
+  
 		StringBuilder sql = new StringBuilder("INSERT OR IGNORE INTO " + table + " (user_name, code) VALUES");
 		for (String ignored : codes) {
 			sql.append("(?, ?),");
