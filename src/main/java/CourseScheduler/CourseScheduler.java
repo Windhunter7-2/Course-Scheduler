@@ -585,14 +585,26 @@ public class CourseScheduler extends Application {
      * the "Back" button to go back to the previous step of the checklist (selectProfileInit()), or the "Home"
      * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
      */
-    public void generateSchedule(List<Course> neededCourses, int maxCredits, int maxSemesters)
+    public void generateSchedule(List<Course> neededCourses, List<Course> doneCourses, int maxCredits, int maxSemesters)
     {
-		//Algorithm
-		RunAlgorithm runAlg = new RunAlgorithm();
-		Course [] orderedList = runAlg.runAlgorithm(neededCourses);
-		List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
+    	//Remove Done Courses
+    	for (int i = 0; i < neededCourses.size(); i++)
+    	{
+    		Course current = neededCourses.get(i);
+    		for (int j = 0; j < doneCourses.size(); j++)
+    		{
+    			Course curDone = doneCourses.get(j);
+        		if (current.getPrerequisites().contains(curDone))
+        			neededCourses.get(i).getPrerequisites().remove(j);
+    		}
+    	}
+    	
+	//Algorithm
+	RunAlgorithm runAlg = new RunAlgorithm();
+	Course [] orderedList = runAlg.runAlgorithm(neededCourses);
+	List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
 		
-		//GUI Interaction
+	//GUI Interaction
     	for (int i = 0; i < orderedSemesters.size(); i++)
     	{
     		Semester tempS = orderedSemesters.get(i);
