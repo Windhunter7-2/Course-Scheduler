@@ -111,11 +111,6 @@ public class CourseScheduler extends Application {
                 td.showAndWait();
                 selectprofile.getItems().add(td.getEditor().getText());
             }
-            else{
-                loadProfile(value);
-                getProfileList();
-            }
-
         };
 
 
@@ -139,19 +134,6 @@ public class CourseScheduler extends Application {
         stage.show();
 
 
-    }
-    
-    /**
-     * loads a profile from the database.
-     *
-     */
-    public void loadProfile(String name){
-
-    }
-    
-    
-    public ArrayList<String> getProfileList(){
-        return profileNames;
     }
     
     //Helper method to update the display of the time last run once scraping is complete.
