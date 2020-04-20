@@ -115,6 +115,17 @@ public class ProfileDB {
 	}
 	
 	private void setCoursesTable(String table, String profile, List<String> codes) {
+    	if (codes.isEmpty()) {
+			StringBuilder sql = new StringBuilder("DELETE FROM " + table + ";");
+			try (Connection conn = db.get();
+				 PreparedStatement st = conn.prepareStatement(sql.toString())) {
+				st.execute();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+    		return;
+		}
+  
 		StringBuilder sql = new StringBuilder("INSERT OR IGNORE INTO " + table + " (user_name, code) VALUES");
 		for (String ignored : codes) {
 			sql.append("(?, ?),");
