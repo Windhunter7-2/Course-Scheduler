@@ -42,7 +42,6 @@ public class CourseScheduler extends Application {
     private Catalog catalog;
     private Scraper scraper;
     final int GUIHEIGHT = 900, GUIWIDTH = 1100;
-    List<String> profileNames = new ArrayList<>();
 
     public void start(Stage primaryStage) throws Exception { //All GUI method calls will go in here
         // TODO some kind of intialization screen?
@@ -55,8 +54,6 @@ public class CourseScheduler extends Application {
         if (Profile.db == null) {
             Profile.db = new ProfileDB().create();
         }
-        
-        this.profileNames = Profile.db.getProfiles();
         
         try {
             profileGUI(primaryStage, catalog.getCourses(), this);
@@ -98,7 +95,6 @@ public class CourseScheduler extends Application {
             String value = (String) selectprofile.getValue();
             //Creates a new profile when "create new profile" isselected from the combo box
             if(value.equals("Create New Profile")) {
-                System.out.println(profileNames);
                 td.showAndWait();
                 selectprofile.getItems().add(td.getEditor().getText());
             }
@@ -113,7 +109,7 @@ public class CourseScheduler extends Application {
 
         selectprofile.getItems().add("Create New Profile");
         //selectprofile.setOnAction(e->createnewprofile(selectprofile));
-        selectprofile.getItems().addAll(profileNames);
+        selectprofile.getItems().addAll(Profile.db.getProfiles());
         selectprofile.setOnAction(event);
        // selectprofile.setOnAction(e->loadProfile());
 
