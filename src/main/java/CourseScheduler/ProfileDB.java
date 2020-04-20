@@ -115,16 +115,13 @@ public class ProfileDB {
 	}
 	
 	private void setCoursesTable(String table, String profile, List<String> codes) {
-    	if (codes.isEmpty()) {
-			try (Connection conn = db.get();
-				 PreparedStatement st = conn.prepareStatement("DELETE FROM " + table + ";")) {
-				st.execute();
-			} catch (SQLException | IOException e) {
-				e.printStackTrace();
-			}
-    		return;
+		try (Connection conn = db.get();
+			 PreparedStatement st = conn.prepareStatement("DELETE FROM " + table + ";")) {
+			st.execute();
+		} catch (SQLException | IOException e) {
+			e.printStackTrace();
 		}
-  
+  		
 		StringBuilder sql = new StringBuilder("INSERT OR IGNORE INTO " + table + " (user_name, code) VALUES");
 		for (String ignored : codes) {
 			sql.append("(?, ?),");
