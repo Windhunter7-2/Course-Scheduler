@@ -40,11 +40,21 @@ public class CourseScheduler extends Application {
 
     Stage stage;
     Scene scene;
-    ArrayList<String> profilenames = new ArrayList<>();
     Scraper scraper;
     final int GUIHEIGHT = 900, GUIWIDTH = 1100;
+    List<String> profileNames = new ArrayList<>();
 
     public void start(Stage primaryStage) throws Exception { //All GUI method calls will go in here
+        if (Profile.db == null) {
+            try {
+                Profile.db = new ProfileDB().create();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        
+        this.profileNames = Profile.db.getProfiles();
+        
         try {
 //            scraper = new Scraper(new Catalog(new Database("testDB")));
 //            scraperGUI(primaryStage);
@@ -79,20 +89,6 @@ public class CourseScheduler extends Application {
 //        }
     }
     public void profileGUI(Stage stage){
-        if (Profile.db == null) {
-            try {
-                Profile.db = new ProfileDB().create();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-        
-        //ArrayList<String> profilenames = new ArrayList<>();
-        profilenames.add("Akeem");
-        profilenames.add("Jack");
-        profilenames.add("Nathan");
-        profilenames.add("Evan");
-
        // StackPane pane = new StackPane();
         GridPane pane = new GridPane();
 
@@ -111,7 +107,7 @@ public class CourseScheduler extends Application {
             String value = (String) selectprofile.getValue();
             //Creates a new profile when "create new profile" isselected from the combo box
             if(value.equals("Create New Profile")) {
-                System.out.println(profilenames);
+                System.out.println(profileNames);
                 td.showAndWait();
                 selectprofile.getItems().add(td.getEditor().getText());
             }
@@ -125,7 +121,7 @@ public class CourseScheduler extends Application {
 
         selectprofile.getItems().add("Create New Profile");
         //selectprofile.setOnAction(e->createnewprofile(selectprofile));
-        selectprofile.getItems().addAll(profilenames);
+        selectprofile.getItems().addAll(profileNames);
         selectprofile.setOnAction(event);
        // selectprofile.setOnAction(e->loadProfile());
 
@@ -152,13 +148,12 @@ public class CourseScheduler extends Application {
     public void loadProfile(String name){
 
     }
-    /**
-     * gets the list of profiles .
-     *
-     */
+    
+    
     public ArrayList<String> getProfileList(){
-        return profilenames;
+        return profileNames;
     }
+    
     //Helper method to update the display of the time last run once scraping is complete.
     private void updateTime(Label timeLabel, DateTimeFormatter dtf) throws IOException {
        // File timeFileToUpdate = LocalStorage.get("dateLastRun.txt");

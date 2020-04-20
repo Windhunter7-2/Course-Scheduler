@@ -89,6 +89,21 @@ public class ProfileDB {
 		}
 	}
 	
+	public List<String> getProfiles() {
+    	String sql = "SELECT user_name FROM profiles;";
+		List<String> strs = new ArrayList<>();
+		try (Connection conn = connection; PreparedStatement st = conn.prepareStatement(sql)) {
+			ResultSet res = st.executeQuery();
+			int i = 0;
+			while (res.next()) {
+				strs.add(res.getString(i));
+			}
+		} catch (SQLException throwables) {
+			throwables.printStackTrace();
+		}
+		return strs;
+	}
+	
 	public void setNeededCourses(String profile, List<String> codes) {
     	setCoursesTable(NEEDED_COURSES_TABLE, profile, codes);
 	}
