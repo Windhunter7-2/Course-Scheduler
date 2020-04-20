@@ -285,7 +285,8 @@ public class Scraper {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(dateFile));
 			line = br.readLine();
-			timeLastRun = LocalDateTime.parse(line, DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss"));
+			if (line != null)
+				timeLastRun = LocalDateTime.parse(line, DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss"));
 		} catch (IOException ex) {
 			System.out.println("IOException in Scraper.getLastRun()\n");
 			ex.printStackTrace();
