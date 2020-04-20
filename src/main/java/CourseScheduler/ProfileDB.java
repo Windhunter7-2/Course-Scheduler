@@ -96,7 +96,7 @@ public class ProfileDB {
 		List<String> strs = new ArrayList<>();
 		try (Connection conn = db.get(); PreparedStatement st = conn.prepareStatement(sql)) {
 			ResultSet res = st.executeQuery();
-			int i = 0;
+			int i = 1;
 			while (res.next()) {
 				strs.add(res.getString(i));
 			}
