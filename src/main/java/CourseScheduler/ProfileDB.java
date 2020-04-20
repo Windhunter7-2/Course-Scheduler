@@ -1,10 +1,10 @@
 package CourseScheduler;
 
+import javafx.scene.Cursor;
+
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 
 public class ProfileDB  {
     private  Database profiledb;
@@ -133,6 +133,18 @@ public class ProfileDB  {
             System.out.println(e.getMessage());
         }
     }
+    public void deleteMyGradCourses(int id, String code ){
+        String sql = "DELETE FROM my_grad_courses WHERE user_id = id AND code = code";
+        try (Connection conn = connection;
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, code);
+            //pstmt.setDouble(2, capacity);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
     public void insertNeededCourses(int id, String code ){
         String sql = "INSERT INTO needed_courses(user_id,code) VALUES(?,?)";
         try (Connection conn = connection;
@@ -183,6 +195,30 @@ public class ProfileDB  {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+    public ArrayList<String> getNeededCourses(int id) throws SQLException {
+        ArrayList neededCourses = new ArrayList<String>();
+        Statement statement = connection.createStatement();
+        String sql = "SELECT code FROM needed_courses WHERE user_id=id ;";
+        ResultSet rs = statement.executeQuery(sql);
+        if (rs.next()) {
+            //int id = rs.getInt("first_column_name");
+            String str1 = rs.getString("code");
+            neededCourses.add(str1);
+        }
+        return neededCourses;
+    }
+    public ArrayList<String> getDoneCourses(int id) throws SQLException {
+        ArrayList doneCourses = new ArrayList<String>();
+        Statement statement = connection.createStatement();
+        String sql = "SELECT code FROM needed_courses WHERE user_id=id ;";
+        ResultSet rs = statement.executeQuery(sql);
+        if (rs.next()) {
+            //int id = rs.getInt("first_column_name");
+            String str1 = rs.getString("code");
+            doneCourses.add(str1);
+        }
+        return doneCourses;
     }
 
     /**

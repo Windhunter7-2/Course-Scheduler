@@ -1,5 +1,6 @@
 package CourseScheduler;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,54 +44,54 @@ public class Profile {
 
     /**
      * inserts graduation courses associated with user id
-     * @param id each user has an id
+     *
      * @param code course code
      */
-    public void insertMyGradCoursesTable(int id, String code ){
-        user_profiles.insertMyGradCourses(id, code);
+    public void insertMyGradCoursesTable( String code ){
+        user_profiles.insertMyGradCourses(getID(), code);
     }
     /**
      * inserts done courses associated with user id
-     * @param id each user has an id
+     * @param /*id each user has an id
      * @param code course code
      */
-    public void insertNeededCoursesTable(int id, String code ){
-        user_profiles.insertNeededCourses(id, code);
+    public void insertNeededCoursesTable(/*int id,*/ String code ){
+        user_profiles.insertNeededCourses(getID(), code);
     }
 
     /**
      * inserts done courses associated with user id
-     * @param id each user has an id
+     * @param /*id each user has an id
      * @param code course code
      */
-    public void insertDoneCoursesTable(int id, String code ){
-        user_profiles.insertDoneCourses(id, code);
+    public void insertDoneCoursesTable(/*int id,*/ String code ){
+        user_profiles.insertDoneCourses(getID(), code);
     }
 
     /**
-     * updaate mygrad  courses associated with user id
-     * @param id each user has an id
+     * delete mygrad  courses associated with user id
+     * @param /*id each user has an id
      * @param code course code
      */
-    public void updateMyGradCoursesTable(int id, String code ){
-        user_profiles.insertDoneCourses(id, code);
+    public void deleteMyGradCoursesTable(/*int id,*/ String code ){
+        user_profiles.deleteDoneCourses(getID(), code);
     }
     /**
-     * updaate needed courses associated with user id
-     * @param id each user has an id
+     * delete needed courses associated with user id
+     * @param/* id each user has an id
      * @param code course code
      */
-    public void updateNeededCoursesTable(int id, String code ){
-        user_profiles.insertDoneCourses(id, code);
+    public void deleteNeededCoursesTable(/*int id,*/ String code ){
+        user_profiles.deleteDoneCourses(getID(), code);
     }
 
     /**
-     * updaate done courses associated with user id
-     * @param id each user has an id
+     * delete done courses associated with user id
+     * @param /*id each user has an id
      * @param code course code
      */
-    public void updateDoneCoursesTable(int id, String code ){
-        user_profiles.insertDoneCourses(id, code);
+    public void deleteDoneCoursesTable(/*int id,*/ String code ){
+        user_profiles.deleteDoneCourses(getID(), code);
     }
     /**
      * sets user's choice of credits
@@ -148,7 +149,8 @@ public class Profile {
      * gets needed courses
      * @return neededcourses
      */
-    public ArrayList<String> getNeededCourses() {
+    public ArrayList<String> getNeededCourses() throws SQLException {
+        neededCourses=user_profiles.getNeededCourses(getID());
         return neededCourses;
     }
 
@@ -156,7 +158,9 @@ public class Profile {
      * gets done courses.
      * @return donecourses
      */
-    public ArrayList<String> getDoneCourses() {
+    public ArrayList<String> getDoneCourses() throws SQLException {
+        doneCourses=user_profiles.getDoneCourses(getID());
+
         return doneCourses;
     }
 

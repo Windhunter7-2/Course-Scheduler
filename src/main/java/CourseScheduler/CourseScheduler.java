@@ -145,7 +145,7 @@ public class CourseScheduler extends Application {
      */
     public void createProfile(String name){
         Profile newprofile = new Profile(name);
-        newprofile.insertProfileDB();
+        newprofile.insertProfileTable();
         System.out.println("this is my profile name "+ newprofile.getName());
     }
     /**
@@ -213,12 +213,14 @@ public class CourseScheduler extends Application {
      * @param profile the profile with which to check if courses have been marked "needed" or "done".
      * @return the List or CourseHelpers
      */
-    private static List<CourseHelper> toHelperList(List<Course> courseList, Profile profile) {
+    private static List<CourseHelper> toHelperList(List<Course> courseList, Profile profile) throws SQLException {
         List<CourseHelper> helperList = new ArrayList<>();
         for(int i = 0; i < courseList.size(); i++) {
             if(courseList.get(i) != null) {
                 helperList.add(new CourseHelper(
                         courseList.get(i),
+                        /*profile.getNeededCourses().contains(courseList.get(i).getCode()),
+                        profile.getDoneCourses().contains(courseList.get(i).getCode())));*/
                         profile.getNeededCourses().contains(courseList.get(i).getCode()),
                         profile.getDoneCourses().contains(courseList.get(i).getCode())));
             }
@@ -264,11 +266,12 @@ public class CourseScheduler extends Application {
      * @param stage the stage on which to display this GUI
      * @param cs the instance of CourseScheduler calling this method.
      */
-    public void checkListGUI(List<Course> courseList, Profile profile, Stage stage, CourseScheduler cs) {
+    public void checkListGUI(List<Course> courseList, Profile profile, Stage stage, CourseScheduler cs) throws SQLException {
         //Set up the table in which courses will dynamically populate rows as user searches.
         TableView<Course> courseTable = new TableView<>();
         TableView<CourseHelper> checkBoxTable = new TableView<>();
         //Create and populate lists of CourseHelpers to aid in the GUI's dynamic elements.
+        /*List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);*/
         List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);
         List<CourseHelper> newDoneHelpers = new ArrayList<>();
         List<CourseHelper> newNeededHelpers = new ArrayList<>();
