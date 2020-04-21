@@ -24,7 +24,7 @@ public class ProfileDBTest {
         create().insertProfile("Nate");
         create().insertProfile("Jack");
         create().insertProfile("Evan");
-
+        create().insertProfile("Evan");
 
     }
 
