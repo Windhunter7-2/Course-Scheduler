@@ -10,6 +10,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
@@ -240,6 +241,7 @@ public class CourseScheduler extends Application {
         List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);
         List<CourseHelper> newDoneHelpers = new ArrayList<>();
         List<CourseHelper> newNeededHelpers = new ArrayList<>();
+
         for(int i = 0; i < helperList.size(); i++) {
             CourseHelper temp = helperList.get(i);
             if(temp.isDone()) {
@@ -314,11 +316,11 @@ public class CourseScheduler extends Application {
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
                         if(param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().add(param.getValue());
-//                            Profile.user_profiles.insertDoneCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getDone().add(param.getValue().course.getCode());
                         }
                         else if(!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().remove(param.getValue());
-//                            Profile.user_profiles.deleteDoneCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getDone().remove(param.getValue().course.getCode());
                         }
                         return param.getValue().done;
                     }
@@ -356,6 +358,7 @@ public class CourseScheduler extends Application {
         searchHBox.setAlignment(Pos.CENTER_LEFT);
         HBox tableHBox = new HBox(checkBoxTable, courseTable);
         tableHBox.setAlignment(Pos.CENTER);
+        tableHBox.setPadding(new Insets(0, 10, 0, 0));
 
         final VBox tableSearchVBox = new VBox();
         tableSearchVBox.setSpacing(5);
@@ -393,25 +396,55 @@ public class CourseScheduler extends Application {
                 profile.setNumSemesters(8);
             }
             List<Course> neededCourseList = new ArrayList<>();
-            for(int i = 0; i < newNeededHelpers.size(); i++) {
+            for(int i = 0; i < profile.getNeeded().size(); i++) {
                 neededCourseList.add(getCourseByCode(courseList, profile.getNeeded().get(i)));
             }
             List<Course> doneCourseList = new ArrayList<>();
-            for(int i = 0; i < newDoneHelpers.size(); i++) {
-                neededCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
+            for(int i = 0; i < profile.getDone().size(); i++) {
+                doneCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
             }
-            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters());
+            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters(), profile, stage, cs);
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
-        optionsVBox.setPadding(new Insets(10, 0, 0, 10));
         optionsVBox.getChildren().addAll(optionsHeader, creditsLabel, creditsTextBox, semestersLabel, semestersTextBox, backButton, saveButton);
         //END LEFT MODULE
         //BEGIN COALESCENCE AND FINALIZATION
         HBox grandHBox = new HBox(5, optionsVBox, tableSearchVBox, neededDoneVBox);
+        grandHBox.setPadding(new Insets(10, 10, 10, 10));
         ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
         stage.setScene(scene);
         stage.show();
+
+        ScrollBar courseScrollBar = new ScrollBar();
+        ScrollBar checksScrollBar = new ScrollBar();
+        for (Node node : courseTable.lookupAll(".scroll-bar")) {
+            if (node instanceof ScrollBar) {
+                courseScrollBar = (ScrollBar) node;
+                break;
+            }
+        }
+        for (Node node : checkBoxTable.lookupAll(".scroll-bar")) {
+            if (node instanceof ScrollBar) {
+                checksScrollBar = (ScrollBar) node;
+                break;
+            }
+        }
+        this.bindScrollBars(courseScrollBar, checksScrollBar);
+    }
+
+    /**
+     * Helper function to bind the two scrollbars of checkListGUI() to scroll in unison.
+     * @param sb1 the first scrollbar to bind.
+     * @param sb2 the second scrollbar to bind.
+     */
+    private void bindScrollBars(ScrollBar sb1, ScrollBar sb2) {
+        sb1.valueProperty().addListener((src, ov, nv) -> {
+            sb2.setValue(nv.doubleValue() / sb1.getMax());
+        });
+        sb2.valueProperty().addListener((src, ov, nv) -> {
+            sb1.setValue(nv.doubleValue() * sb2.getMax());
+        });
     }
 
     /**
