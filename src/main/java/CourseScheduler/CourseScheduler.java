@@ -613,7 +613,8 @@ public class CourseScheduler extends Application {
      * the "Back" button to go back to the previous step of the checklist (selectProfileInit()), or the "Home"
      * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
      */
-    public void generateSchedule(List<Course> neededCourses, List<Course> doneCourses, int maxCredits, int maxSemesters)
+    public void generateSchedule(List<Course> neededCourses, List<Course> doneCourses, int maxCredits, int maxSemesters,
+    		Profile profile, Stage stage, CourseScheduler cs)
     {
     	//Remove Done Courses
     	for (int i = 0; i < neededCourses.size(); i++)
