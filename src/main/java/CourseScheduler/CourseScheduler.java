@@ -396,12 +396,12 @@ public class CourseScheduler extends Application {
                 profile.setNumSemesters(8);
             }
             List<Course> neededCourseList = new ArrayList<>();
-            for(int i = 0; i < newNeededHelpers.size(); i++) {
+            for(int i = 0; i < profile.getNeeded().size(); i++) {
                 neededCourseList.add(getCourseByCode(courseList, profile.getNeeded().get(i)));
             }
             List<Course> doneCourseList = new ArrayList<>();
-            for(int i = 0; i < newDoneHelpers.size(); i++) {
-                neededCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
+            for(int i = 0; i < profile.getDone().size(); i++) {
+                doneCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
             }
             generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters(), profile, stage, cs);
         });
