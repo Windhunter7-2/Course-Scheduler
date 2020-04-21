@@ -316,11 +316,11 @@ public class CourseScheduler extends Application {
                     public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
                         if(param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().add(param.getValue());
-//                            Profile.user_profiles.insertDoneCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getDone().add(param.getValue().course.getCode());
                         }
                         else if(!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
                             doneList.getItems().remove(param.getValue());
-//                            Profile.user_profiles.deleteDoneCourses(profile.getID(), param.getValue().course.getCode());
+                            profile.getDone().remove(param.getValue().course.getCode());
                         }
                         return param.getValue().done;
                     }
@@ -358,6 +358,7 @@ public class CourseScheduler extends Application {
         searchHBox.setAlignment(Pos.CENTER_LEFT);
         HBox tableHBox = new HBox(checkBoxTable, courseTable);
         tableHBox.setAlignment(Pos.CENTER);
+        tableHBox.setPadding(new Insets(0, 10, 0, 0));
 
         final VBox tableSearchVBox = new VBox();
         tableSearchVBox.setSpacing(5);
@@ -406,11 +407,11 @@ public class CourseScheduler extends Application {
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
-        optionsVBox.setPadding(new Insets(10, 0, 0, 10));
         optionsVBox.getChildren().addAll(optionsHeader, creditsLabel, creditsTextBox, semestersLabel, semestersTextBox, backButton, saveButton);
         //END LEFT MODULE
         //BEGIN COALESCENCE AND FINALIZATION
         HBox grandHBox = new HBox(5, optionsVBox, tableSearchVBox, neededDoneVBox);
+        grandHBox.setPadding(new Insets(10, 10, 10, 10));
         ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
         stage.setScene(scene);
         stage.show();
