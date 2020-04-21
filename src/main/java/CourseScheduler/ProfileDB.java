@@ -13,9 +13,13 @@ public class ProfileDB {
 	
 	private Database db;
 	
-	public ProfileDB() throws IOException, SQLException {
-		db = new Database("user_profiles");
+	public ProfileDB(String name) throws IOException, SQLException {
+		db = new Database(name);
 		db.create();
+	}
+	
+	public ProfileDB() throws IOException, SQLException {
+		this("user_profiles");
 	}
 	
 	private static final String PROFILES_TABLE = "profiles";
