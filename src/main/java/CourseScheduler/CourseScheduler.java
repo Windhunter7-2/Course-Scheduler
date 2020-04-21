@@ -415,6 +415,36 @@ public class CourseScheduler extends Application {
         ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
         stage.setScene(scene);
         stage.show();
+
+        ScrollBar courseScrollBar = new ScrollBar();
+        ScrollBar checksScrollBar = new ScrollBar();
+        for (Node node : courseTable.lookupAll(".scroll-bar")) {
+            if (node instanceof ScrollBar) {
+                courseScrollBar = (ScrollBar) node;
+                break;
+            }
+        }
+        for (Node node : checkBoxTable.lookupAll(".scroll-bar")) {
+            if (node instanceof ScrollBar) {
+                checksScrollBar = (ScrollBar) node;
+                break;
+            }
+        }
+        this.bindScrollBars(courseScrollBar, checksScrollBar);
+    }
+
+    /**
+     * Helper function to bind the two scrollbars of checkListGUI() to scroll in unison.
+     * @param sb1 the first scrollbar to bind.
+     * @param sb2 the second scrollbar to bind.
+     */
+    private void bindScrollBars(ScrollBar sb1, ScrollBar sb2) {
+        sb1.valueProperty().addListener((src, ov, nv) -> {
+            sb2.setValue(nv.doubleValue() / sb1.getMax());
+        });
+        sb2.valueProperty().addListener((src, ov, nv) -> {
+            sb1.setValue(nv.doubleValue() * sb2.getMax());
+        });
     }
 
     /**
