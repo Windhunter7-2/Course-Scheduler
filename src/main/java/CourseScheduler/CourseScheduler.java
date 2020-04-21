@@ -10,6 +10,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
@@ -240,6 +241,7 @@ public class CourseScheduler extends Application {
         List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);
         List<CourseHelper> newDoneHelpers = new ArrayList<>();
         List<CourseHelper> newNeededHelpers = new ArrayList<>();
+
         for(int i = 0; i < helperList.size(); i++) {
             CourseHelper temp = helperList.get(i);
             if(temp.isDone()) {
@@ -400,7 +402,7 @@ public class CourseScheduler extends Application {
             for(int i = 0; i < newDoneHelpers.size(); i++) {
                 neededCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
             }
-            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters());
+            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters(), profile, stage, cs);
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
