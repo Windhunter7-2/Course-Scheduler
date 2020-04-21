@@ -10,6 +10,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
@@ -240,6 +241,7 @@ public class CourseScheduler extends Application {
         List<CourseHelper> helperList = CourseScheduler.toHelperList(courseList, profile);
         List<CourseHelper> newDoneHelpers = new ArrayList<>();
         List<CourseHelper> newNeededHelpers = new ArrayList<>();
+
         for(int i = 0; i < helperList.size(); i++) {
             CourseHelper temp = helperList.get(i);
             if(temp.isDone()) {
@@ -393,14 +395,14 @@ public class CourseScheduler extends Application {
                 profile.setNumSemesters(8);
             }
             List<Course> neededCourseList = new ArrayList<>();
-            for(int i = 0; i < newNeededHelpers.size(); i++) {
+            for(int i = 0; i < profile.getNeeded().size(); i++) {
                 neededCourseList.add(getCourseByCode(courseList, profile.getNeeded().get(i)));
             }
             List<Course> doneCourseList = new ArrayList<>();
-            for(int i = 0; i < newDoneHelpers.size(); i++) {
-                neededCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
+            for(int i = 0; i < profile.getDone().size(); i++) {
+                doneCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
             }
-            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters());
+            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters(), profile, stage, cs);
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
@@ -412,6 +414,36 @@ public class CourseScheduler extends Application {
         ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
         stage.setScene(scene);
         stage.show();
+
+        ScrollBar courseScrollBar = new ScrollBar();
+        ScrollBar checksScrollBar = new ScrollBar();
+        for (Node node : courseTable.lookupAll(".scroll-bar")) {
+            if (node instanceof ScrollBar) {
+                courseScrollBar = (ScrollBar) node;
+                break;
+            }
+        }
+        for (Node node : checkBoxTable.lookupAll(".scroll-bar")) {
+            if (node instanceof ScrollBar) {
+                checksScrollBar = (ScrollBar) node;
+                break;
+            }
+        }
+        this.bindScrollBars(courseScrollBar, checksScrollBar);
+    }
+
+    /**
+     * Helper function to bind the two scrollbars of checkListGUI() to scroll in unison.
+     * @param sb1 the first scrollbar to bind.
+     * @param sb2 the second scrollbar to bind.
+     */
+    private void bindScrollBars(ScrollBar sb1, ScrollBar sb2) {
+        sb1.valueProperty().addListener((src, ov, nv) -> {
+            sb2.setValue(nv.doubleValue() / sb1.getMax());
+        });
+        sb2.valueProperty().addListener((src, ov, nv) -> {
+            sb1.setValue(nv.doubleValue() * sb2.getMax());
+        });
     }
 
     /**
@@ -580,7 +612,8 @@ public class CourseScheduler extends Application {
      * the "Back" button to go back to the previous step of the checklist (selectProfileInit()), or the "Home"
      * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
      */
-    public void generateSchedule(List<Course> neededCourses, List<Course> doneCourses, int maxCredits, int maxSemesters)
+    public void generateSchedule(List<Course> neededCourses, List<Course> doneCourses, int maxCredits, int maxSemesters,
+    		Profile profile, Stage stage, CourseScheduler cs)
     {
     	//Remove Done Courses
     	for (int i = 0; i < neededCourses.size(); i++)
