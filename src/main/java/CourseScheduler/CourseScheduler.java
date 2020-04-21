@@ -356,11 +356,10 @@ public class CourseScheduler extends Application {
         searchHBox.setAlignment(Pos.CENTER_LEFT);
         HBox tableHBox = new HBox(checkBoxTable, courseTable);
         tableHBox.setAlignment(Pos.CENTER);
-        tableHBox.setPadding(new Insets(0, 10, 0, 0));
 
         final VBox tableSearchVBox = new VBox();
         tableSearchVBox.setSpacing(5);
-        tableSearchVBox.setPadding(new Insets(10, 0, 0, 10));
+        tableSearchVBox.setPadding(new Insets(0, 10, 0, 10));
         tableSearchVBox.getChildren().addAll(selectClassesHeader, searchHBox, tableHBox);
         //END MIDDLE MODULE
         //BEGIN LEFT MODULE
