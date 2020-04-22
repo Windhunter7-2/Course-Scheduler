@@ -7,6 +7,9 @@ plugins {
     
     // Enable JavaFX
     id 'org.openjfx.javafxplugin' version '0.0.8'
+    
+    // ShadowJAR for assembling
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 repositories {
@@ -24,13 +27,18 @@ dependencies {
 
 application {
     // Define the main class for the application
-    mainClassName = 'CourseScheduler.CourseScheduler'
+    mainClassName = 'CourseScheduler.App'
 }
 
 jar {
     manifest {
         attributes('Main-Class': 'CourseScheduler.App')
     }
+}
+
+shadowJar {
+    baseName = 'CourseScheduler'
+    classifier = '' // remove -all classifier
 }
 
 // Configures JavaFX
