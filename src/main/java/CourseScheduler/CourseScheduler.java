@@ -17,15 +17,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -56,12 +48,12 @@ public class CourseScheduler extends Application {
         if (Profile.db == null) {
             Profile.db = new ProfileDB().create();
         }
-        
-        if (scraper.needsToRun()) {
-            scraperGUI(primaryStage, this);
-        } else {
-            profileGUI(primaryStage, this);
-        }
+        scraperGUI(primaryStage, this);
+//        if (scraper.needsToRun()) {
+//            scraperGUI(primaryStage, this);
+//        } else {
+//            profileGUI(primaryStage, this);
+//        }
     }
     
     public void profileGUI(Stage stage, CourseScheduler cs) {
@@ -426,7 +418,7 @@ public class CourseScheduler extends Application {
      */
     public void scraperGUI(Stage stage, CourseScheduler cs) {
         //Set up stage, and elements of window.
-        Button backButton = new Button("Back");
+        Button backButton = new Button("Continue to\nProfile Select");
         backButton.setPrefSize(150, 60);
         backButton.setStyle("-fx-font-size:15");
         stage.setTitle("Rescrape Data");
@@ -437,15 +429,19 @@ public class CourseScheduler extends Application {
         scrapeButton.setPrefSize(300, 80);
         scrapeButton.setStyle("-fx-font-size:30");
         Label scraperStatus = new Label("");
+        ProgressBar scrapingProgress = new ProgressBar();
+        scrapingProgress.setProgress(0.0);
+        scrapingProgress.setScaleX(3);
         
         //Lay out the elements in a GridPane.
         GridPane gp = new GridPane();
         gp.setAlignment(Pos.CENTER);
-        gp.setVgap(200);
+        gp.setVgap(50);
         gp.add(lastRun, 0, 0);
-        gp.add(scrapeButton, 0, 1);
-        gp.add(backButton, 1, 1);
-        gp.add(scraperStatus, 0, 2);
+        gp.add(scrapeButton, 0, 3);
+        gp.add(backButton, 0, 10);
+        gp.add(scrapingProgress, 0, 5);
+        gp.add(scraperStatus, 0, 6);
         
         //Set constraints - center everything so it's nice and pretty.
         ColumnConstraints colCon = new ColumnConstraints();
@@ -467,12 +463,16 @@ public class CourseScheduler extends Application {
                         System.out.println(ioe.getMessage());
                     }
                 };
-                updateMessage("Scraping...");
                 scraper.run(u -> {
-                    // Handle update
+                    System.out.println(u.getPercent());
+                    if(u.getPercent() != null) {
+                        scrapingProgress.setProgress(u.getPercent());
+                    }
+                    updateMessage(u.getMessage());
                 });
                 updateMessage("Scraping Complete");
                 Platform.runLater(timeUpdater);
+                succeeded();
                 return null;
             }
         };
@@ -481,7 +481,7 @@ public class CourseScheduler extends Application {
             Thread scrapeThread = new Thread(scrapeTask);
             scrapeThread.setDaemon(true);
             scrapeThread.start();
-            scrapeButton.setDisable(false);
+            scrapeButton.setDisable(true);
         };
         
         EventHandler<ActionEvent> backBtnPressed = scrapeReq -> cs.profileGUI(stage, cs);
