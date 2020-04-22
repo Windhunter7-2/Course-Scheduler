@@ -126,6 +126,7 @@ public class CourseScheduler extends Application {
         pane.add(btnContinue, 1,1 );
         //pane.getChildren().addAll(selectprofile);
         stage.setScene(new Scene(pane, 300, 275));
+        stage.centerOnScreen();
         stage.show();
     }
     
@@ -400,6 +401,7 @@ public class CourseScheduler extends Application {
         grandHBox.setPadding(new Insets(10, 10, 10, 10));
         ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
         stage.setScene(scene);
+        stage.centerOnScreen();
         stage.show();
 
         ScrollBar courseScrollBar = new ScrollBar();
@@ -493,6 +495,7 @@ public class CourseScheduler extends Application {
         
         //Show the scene created above.
         stage.setScene(scene);
+        stage.centerOnScreen();
         stage.show();
     }
 
