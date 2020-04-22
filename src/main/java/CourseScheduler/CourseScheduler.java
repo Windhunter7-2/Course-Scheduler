@@ -37,10 +37,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,33 +52,31 @@ public class CourseScheduler extends Application {
         // TODO some kind of intialization screen?
         catalog = new Catalog(new Database("catalog"));
         scraper = new Scraper(catalog);
-        if (scraper.needsToRun())
-            scraper.run();
-        catalog.create();
-    
+
         if (Profile.db == null) {
             Profile.db = new ProfileDB().create();
         }
         
-        try {
-            profileGUI(primaryStage, catalog.getCourses(), this);
-//            scraperGUI(scraper);
-//            checkListGUI(catalog.getCourses(), Profile.load("Jack"), primaryStage, this);
-        } catch(Exception e) {
-            //Basic Exception catch for now - will expand later.
-            e.printStackTrace();
+        if (scraper.needsToRun()) {
+            scraperGUI(primaryStage, this);
+        } else {
+            profileGUI(primaryStage, this);
         }
-//        try {
-//            scraperGUI(primaryStage);
-//        } catch(Exception e) {
-//            //Basic Exception catch for now - will expand later.
-//            System.out.println(e.toString() + " in CourseScheduler.start()\n");
-//        }
     }
-    public void profileGUI(Stage stage, List<Course> courseList, CourseScheduler cs){
+    
+    public void profileGUI(Stage stage, CourseScheduler cs) {
        // StackPane pane = new StackPane();
         GridPane pane = new GridPane();
-
+    
+        // TODO proper error handling
+        List<Course> courseList;
+        try {
+            courseList = catalog.getCourses();
+        } catch (SQLException | IOException throwables) {
+            throwables.printStackTrace();
+            return;
+        }
+    
         ComboBox<String> selectprofile = new ComboBox();
         Label welcomeLabel = new Label("Welcome To Course Scheduler");
         Button btnContinue = new Button("Continue");
@@ -369,9 +365,7 @@ public class CourseScheduler extends Application {
         Button backButton = new Button("Back");
         backButton.setPrefSize(150, 40);
         backButton.setStyle("-fx-font-size:15");
-        backButton.setOnAction(e -> {
-            cs.profileGUI(stage, courseList, cs);
-        });
+        backButton.setOnAction(e -> cs.profileGUI(stage, cs));
         Button saveButton = new Button("Save");
         saveButton.setPrefSize(150, 40);
         saveButton.setStyle("-fx-font-size:15");
@@ -424,36 +418,26 @@ public class CourseScheduler extends Application {
         }
         this.bindScrollBars(courseScrollBar, checksScrollBar);
     }
-
-    /**
-     * Helper function to bind the two scrollbars of checkListGUI() to scroll in unison.
-     * @param sb1 the first scrollbar to bind.
-     * @param sb2 the second scrollbar to bind.
-     */
-    private void bindScrollBars(ScrollBar sb1, ScrollBar sb2) {
-        sb1.valueProperty().addListener((src, ov, nv) -> sb2.setValue(nv.doubleValue() / sb1.getMax()));
-        sb2.valueProperty().addListener((src, ov, nv) -> sb1.setValue(nv.doubleValue() * sb2.getMax()));
-    }
-
+    
     /**
      * This is a GUI that has buttons to activate the scraper program via accessing Scraper.java’s
      * run() method, and it will also display the time it was last run, via the getLastRun() method.
      * @param stage the stage on which to display the GUI.
      */
-    public void scraperGUI(Stage stage, List<Course> courseList, Profile profile, CourseScheduler cs) throws IOException {
+    public void scraperGUI(Stage stage, CourseScheduler cs) {
         //Set up stage, and elements of window.
         Button backButton = new Button("Back");
         backButton.setPrefSize(150, 60);
         backButton.setStyle("-fx-font-size:15");
         stage.setTitle("Rescrape Data");
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy, hh:mm:ss");
-        Label lastRun = new Label("Last updated on " + dtf.format(scraper.getLastRun()));
+        Label lastRun = new Label("Last updated on " + dtf.format(Scraper.getLastRun()));
         lastRun.setStyle("-fx-font-size:30");
         Button scrapeButton = new Button("Scrape Now");
         scrapeButton.setPrefSize(300, 80);
         scrapeButton.setStyle("-fx-font-size:30");
         Label scraperStatus = new Label("");
-
+        
         //Lay out the elements in a GridPane.
         GridPane gp = new GridPane();
         gp.setAlignment(Pos.CENTER);
@@ -462,16 +446,16 @@ public class CourseScheduler extends Application {
         gp.add(scrapeButton, 0, 1);
         gp.add(backButton, 1, 1);
         gp.add(scraperStatus, 0, 2);
-
+        
         //Set constraints - center everything so it's nice and pretty.
         ColumnConstraints colCon = new ColumnConstraints();
         colCon.setHalignment(HPos.CENTER);
         gp.getColumnConstraints().add(colCon);
-
+        
         //Set window (stage) size and
         stage.setMaximized(true);
         Scene scene = new Scene(gp);
-
+        
         //Define task (scraping with message updates)
         Task<Void> scrapeTask = new Task<>() {
             @Override
@@ -484,7 +468,9 @@ public class CourseScheduler extends Application {
                     }
                 };
                 updateMessage("Scraping...");
-                scraper.run();
+                scraper.run(u -> {
+                    // Handle update
+                });
                 updateMessage("Scraping Complete");
                 Platform.runLater(timeUpdater);
                 return null;
@@ -497,17 +483,27 @@ public class CourseScheduler extends Application {
             scrapeThread.start();
             scrapeButton.setDisable(false);
         };
-
-        EventHandler<ActionEvent> backBtnPressed = scrapeReq -> cs.profileGUI(stage, courseList, cs);
-
+        
+        EventHandler<ActionEvent> backBtnPressed = scrapeReq -> cs.profileGUI(stage, cs);
+        
         //Configure dynamic scene elements.
         scrapeButton.setOnAction(scrapeBtnPressed);
         backButton.setOnAction(backBtnPressed);
         scraperStatus.textProperty().bind(scrapeTask.messageProperty());
-
+        
         //Show the scene created above.
         stage.setScene(scene);
         stage.show();
+    }
+
+    /**
+     * Helper function to bind the two scrollbars of checkListGUI() to scroll in unison.
+     * @param sb1 the first scrollbar to bind.
+     * @param sb2 the second scrollbar to bind.
+     */
+    private void bindScrollBars(ScrollBar sb1, ScrollBar sb2) {
+        sb1.valueProperty().addListener((src, ov, nv) -> sb2.setValue(nv.doubleValue() / sb1.getMax()));
+        sb2.valueProperty().addListener((src, ov, nv) -> sb1.setValue(nv.doubleValue() * sb2.getMax()));
     }
 
     /**

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ public class Scraper {
 	
 	private static final String URL = "https://catalog.gmu.edu/courses/";
 	private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss");
+	private static final int TOTAL_CLASSES = 7522;
 	
 	private final Catalog catalog;
 	private final Database db;
@@ -35,24 +37,24 @@ public class Scraper {
 		this.db = catalog.getDatabase();
 	}
 	
-	public List<Course> run() throws SQLException, IOException {
+	public List<Course> run(Consumer<Progress> consumer) throws SQLException, IOException {
 		catalog.create();
 		dump();
 		
+		consumer.accept(new Progress(null, "Scraping catalog list..."));
 		List<String> catalogs = scrapeCatalogList();
-		System.out.println("Found " + catalogs.size() + " catalogs: " + catalogs);
+		consumer.accept(new Progress(null, "Found " + catalogs.size() + " catalogs to process."));
 		
 		List<Course> courses = new ArrayList<Course>();
 		for (String s : catalogs) {
-			System.out.println("Scraping " + s);
 			courses.addAll(scrapeCourses(s));
+			consumer.accept(new Progress(courses.size() * 1f / TOTAL_CLASSES, "Scraped " + s));
 		}
 		
-		System.out.println("Found " + courses.size() + " courses");
-		
 		save(courses);
-		
 		setLastRun(LocalDateTime.now());
+		
+		consumer.accept(new Progress(Float.MAX_VALUE, "Finished scraping " + courses.size() + " courses"));
 		
 		return courses;
 	}
@@ -282,7 +284,6 @@ public class Scraper {
 		System.out.println("Done.");
 	}
 	
-	
 	/**
 	 * @return The LocalDateTime the scraper was last run, or a year ago if it was never run.
 	 * @throws IOException If the file couldn't be read.
@@ -323,6 +324,34 @@ public class Scraper {
 	// For testing purposes only.
 	static String parsePrereqs(String block) {
 		return parsePrereqs(block, new ArrayList<>(), new ArrayList<>());
+	}
+	
+	class Progress {
+		private Float percent;
+		private String message;
+		
+		Progress(Float percent, String message) {
+			this.percent = percent;
+			this.message = message;
+		}
+		
+		public Float getPercent() {
+			return percent;
+		}
+		
+		public String getMessage() {
+			return message;
+		}
+		
+		@Override
+		public String toString() {
+			final StringBuilder sb = new StringBuilder("Progress{");
+			sb.append("percent=").append(percent);
+			sb.append(", message='").append(message).append('\'');
+			sb.append('}');
+			return sb.toString();
+		}
+		
 	}
 	
 }

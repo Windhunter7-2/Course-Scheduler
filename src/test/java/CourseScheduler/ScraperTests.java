@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 public class ScraperTests {
 	
-//	@Test
+	@Test
 	public void test() throws IOException, SQLException {
 		Database db = new Database("scraper_test");
 		db.create();
@@ -25,7 +25,7 @@ public class ScraperTests {
 		catalog.create();
 		
 		Scraper scraper = new Scraper(catalog);
-		List<Course> courses = scraper.run();
+		List<Course> courses = scraper.run(System.out::println);
 		List<Course> retrieved = catalog.getCourses();
 		
 		// Tests that each course was correctly inserted and retrieved from the database.
