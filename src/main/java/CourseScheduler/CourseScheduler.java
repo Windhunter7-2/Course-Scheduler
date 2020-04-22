@@ -48,12 +48,11 @@ public class CourseScheduler extends Application {
         if (Profile.db == null) {
             Profile.db = new ProfileDB().create();
         }
-        scraperGUI(primaryStage, this);
-//        if (scraper.needsToRun()) {
-//            scraperGUI(primaryStage, this);
-//        } else {
-//            profileGUI(primaryStage, this);
-//        }
+        if (scraper.needsToRun()) {
+            scraperGUI(primaryStage, this);
+        } else {
+            profileGUI(primaryStage, this);
+        }
     }
     
     public void profileGUI(Stage stage, CourseScheduler cs) {
