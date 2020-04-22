@@ -4,15 +4,17 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +24,8 @@ import java.util.stream.Collectors;
 
 public class Scraper {
 	
-	static final String URL = "https://catalog.gmu.edu/courses/";
+	private static final String URL = "https://catalog.gmu.edu/courses/";
+	private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss");
 	
 	private final Catalog catalog;
 	private final Database db;
@@ -48,6 +51,8 @@ public class Scraper {
 		System.out.println("Found " + courses.size() + " courses");
 		
 		save(courses);
+		
+		setLastRun(LocalDateTime.now());
 		
 		return courses;
 	}
@@ -277,11 +282,12 @@ public class Scraper {
 		System.out.println("Done.");
 	}
 	
+	
 	/**
 	 * @return The LocalDateTime the scraper was last run, or a year ago if it was never run.
 	 * @throws IOException If the file couldn't be read.
 	 */
-	public LocalDateTime getLastRun() {
+	public static LocalDateTime getLastRun() {
 		LocalDateTime timeLastRun = LocalDateTime.now().minusYears(1);
 		try {
 			File dateFile = LocalStorage.get("dateLastRun.txt");
@@ -289,12 +295,22 @@ public class Scraper {
 			BufferedReader br = new BufferedReader(new FileReader(dateFile));
 			line = br.readLine();
 			if (line != null)
-				timeLastRun = LocalDateTime.parse(line, DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss"));
+				timeLastRun = LocalDateTime.parse(line, DTF);
 		} catch (IOException ex) {
 			System.out.println("IOException in Scraper.getLastRun()\n");
 			ex.printStackTrace();
 		}
 		return timeLastRun;
+	}
+	
+	/**
+	 * @param time The time to write.
+	 * @throws IOException If the file couldn't be written.
+	 */
+	public static void setLastRun(LocalDateTime time) throws IOException {
+		FileWriter fw = new FileWriter(LocalStorage.get("dateLastRun.txt"));
+		fw.write(DTF.format(time));
+		fw.close();
 	}
 	
 	/**

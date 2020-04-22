@@ -135,10 +135,6 @@ public class CourseScheduler extends Application {
     
     //Helper method to update the display of the time last run once scraping is complete.
     private void updateTime(Label timeLabel, DateTimeFormatter dtf) throws IOException {
-       // File timeFileToUpdate = LocalStorage.get("dateLastRun.txt");
-        FileWriter fw = new FileWriter(LocalStorage.get("dateLastRun.txt"));
-        fw.write(dtf.format(LocalDateTime.now()));
-        fw.close();
         timeLabel.setText("Last updated on " + dtf.format(scraper.getLastRun()));
     }
 
