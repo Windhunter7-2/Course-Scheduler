@@ -119,12 +119,13 @@ public class ProfileDB {
 	}
 	
 	private void setCoursesTable(String table, String profile, List<String> codes) {
-		/*try (Connection conn = db.get();
-			 PreparedStatement st = conn.prepareStatement("DELETE FROM " + table + ";")) {
+		try (Connection conn = db.get();
+			 PreparedStatement st = conn.prepareStatement("DELETE FROM " + table + " WHERE user_name = ?;")) {
+			st.setString(1, profile);
 			st.execute();
 		} catch (SQLException | IOException e) {
 			e.printStackTrace();
-		}*/
+		}
   
 		if (codes.isEmpty())
 			return;
