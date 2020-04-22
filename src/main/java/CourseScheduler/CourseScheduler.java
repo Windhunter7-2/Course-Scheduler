@@ -57,7 +57,7 @@ public class CourseScheduler extends Application {
         if (scraper.needsToRun())
             scraper.run();
         catalog.create();
-        
+    
         if (Profile.db == null) {
             Profile.db = new ProfileDB().create();
         }

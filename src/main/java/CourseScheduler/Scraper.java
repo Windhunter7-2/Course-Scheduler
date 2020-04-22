@@ -276,12 +276,16 @@ public class Scraper {
 		statement.execute();
 		System.out.println("Done.");
 	}
-
-	public LocalDateTime getLastRun() throws IOException {
+	
+	/**
+	 * @return The LocalDateTime the scraper was last run, or a year ago if it was never run.
+	 * @throws IOException If the file couldn't be read.
+	 */
+	public LocalDateTime getLastRun() {
 		LocalDateTime timeLastRun = LocalDateTime.now().minusYears(1);
-		File dateFile = LocalStorage.get("dateLastRun.txt");
-		String line = "";
 		try {
+			File dateFile = LocalStorage.get("dateLastRun.txt");
+			String line;
 			BufferedReader br = new BufferedReader(new FileReader(dateFile));
 			line = br.readLine();
 			if (line != null)
@@ -297,11 +301,7 @@ public class Scraper {
 	 * @return Whether or not the scraper needs to run.
 	 */
 	public boolean needsToRun() {
-		try {
-			return getLastRun().isAfter(LocalDateTime.now().minusMonths(3));
-		} catch (IOException e) {
-			return true;
-		}
+		return getLastRun().isBefore(LocalDateTime.now().minusMonths(3));
 	}
 	
 	// For testing purposes only.

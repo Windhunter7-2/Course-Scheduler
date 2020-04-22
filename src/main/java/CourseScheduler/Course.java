@@ -52,7 +52,7 @@ public class Course {
 	private int flag;
 	
 	/**
-	 * A string representation of the parents, eg "(CS110 & MATH125) | MATHXYZ"
+	 * A string representation of the parents, eg "(CS-110&MATH-125)|MATH-113"
 	 */
 	private final String parents;
 	
