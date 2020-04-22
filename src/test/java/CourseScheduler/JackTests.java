@@ -18,19 +18,24 @@ public class JackTests {
         //Preserve the actual time the scraper was last run.
         File dateFile = LocalStorage.get("dateLastRun.txt");
         BufferedReader br = new BufferedReader(new FileReader(dateFile));
-        BufferedReader br2 = br;
-        String realLastRun = br.readLine();
+        String line = br.readLine();
+        boolean wasEmpty = false;
+        if(line == null) {
+            scr.setLastRun(LocalDateTime.now());
+            wasEmpty = true;
+        }
+        LocalDateTime realLastRun = LocalDateTime.parse(line, DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss"));
         //Update the stored time
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy, HH:mm:ss");
         LocalDateTime testTime = LocalDateTime.now().withNano(0);
-        FileWriter fw = new FileWriter(LocalStorage.get("dateLastRun.txt"));
-        fw.write(dtf.format(testTime));
-        fw.close();
+        scr.setLastRun(testTime);
         //Make sure it works
         assertEquals(scr.getLastRun(), testTime);
         //Restore old time
-        FileWriter fw2 = new FileWriter(LocalStorage.get("dateLastRun.txt"), false);
-        fw2.write(realLastRun);
-        fw2.close();
+        if(wasEmpty) {
+            new FileWriter(dateFile).close(); //Clear file
+        } else {
+            scr.setLastRun(realLastRun); //Restore old contents of file
+        }
     }
 }
