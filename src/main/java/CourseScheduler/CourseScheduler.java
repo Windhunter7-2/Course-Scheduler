@@ -1,35 +1,44 @@
 package CourseScheduler;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.HPos;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.util.Callback;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -37,12 +46,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CourseScheduler extends Application {
-
-    Stage stage;
-    Scene scene;
+    
     private Catalog catalog;
     private Scraper scraper;
-    final int GUIHEIGHT = 900, GUIWIDTH = 1100;
 
     public void start(Stage primaryStage) throws Exception { //All GUI method calls will go in here
         // TODO some kind of intialization screen?
@@ -92,8 +98,7 @@ public class CourseScheduler extends Application {
         // create a event handler to create new profiles
         EventHandler<ActionEvent> event = e -> {
             // show the text input dialog
-
-            String value = (String) selectprofile.getValue();
+            String value = selectprofile.getValue();
             //Creates a new profile when "create new profile" isselected from the combo box
             if(value.equals("Create New Profile")) {
                 td.showAndWait();
@@ -181,8 +186,8 @@ public class CourseScheduler extends Application {
      */
     private static List<CourseHelper> toHelperList(List<Course> courseList, Profile profile) throws SQLException {
         List<CourseHelper> helperList = new ArrayList<>();
-        for(int i = 0; i < courseList.size(); i++) {
-            if(courseList.get(i) != null) {
+        for (int i = 0; i < courseList.size(); i++) {
+            if (courseList.get(i) != null) {
                 helperList.add(new CourseHelper(
                         courseList.get(i),
                         /*profile.getNeededCourses().contains(courseList.get(i).getCode()),
@@ -202,8 +207,8 @@ public class CourseScheduler extends Application {
      */
     private Course getCourseByCode(List<Course> courses, String code) {
         Course ret = courses.get(0);
-        for(int i = 0; i < courses.size(); i++) {
-            if(courses.get(i).getCode().equals(code)) {
+        for (int i = 0; i < courses.size(); i++) {
+            if (courses.get(i).getCode().equals(code)) {
                 ret = courses.get(i);
             }
         }
@@ -291,40 +296,32 @@ public class CourseScheduler extends Application {
         TableColumn needBoxes = new TableColumn("Required");
         needBoxes.setMinWidth(75);
         needBoxes.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>() {
-                    @Override
-                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
-                        if(param.getValue().isReqd() && !neededList.getItems().contains(param.getValue())) {
-                            neededList.getItems().add(param.getValue());
-                            profile.getNeeded().add(param.getValue().course.getCode());
-                        }
-                        else if(!param.getValue().isReqd() && neededList.getItems().contains(param.getValue())) {
-                            neededList.getItems().remove(param.getValue());
-                            profile.getNeeded().remove(param.getValue().course.getCode());
-                        }
-                        return param.getValue().reqd;
+                (Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>) param -> {
+                    if(param.getValue().isReqd() && !neededList.getItems().contains(param.getValue())) {
+                        neededList.getItems().add(param.getValue());
+                        profile.getNeeded().add(param.getValue().course.getCode());
                     }
+                    else if(!param.getValue().isReqd() && neededList.getItems().contains(param.getValue())) {
+                        neededList.getItems().remove(param.getValue());
+                        profile.getNeeded().remove(param.getValue().course.getCode());
+                    }
+                    return param.getValue().reqd;
                 }
         );
         needBoxes.setCellFactory(CheckBoxTableCell.forTableColumn(needBoxes));
 
         TableColumn<CourseHelper, Boolean> doneBoxes = new TableColumn("Completed");
         doneBoxes.setMinWidth(75);
-        doneBoxes.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<CourseHelper, Boolean>, ObservableValue<Boolean>>() {
-                    @Override
-                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<CourseHelper, Boolean> param) {
-                        if(param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
-                            doneList.getItems().add(param.getValue());
-                            profile.getDone().add(param.getValue().course.getCode());
-                        }
-                        else if(!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
-                            doneList.getItems().remove(param.getValue());
-                            profile.getDone().remove(param.getValue().course.getCode());
-                        }
-                        return param.getValue().done;
-                    }
+        doneBoxes.setCellValueFactory(param -> {
+                if (param.getValue().isDone() && !doneList.getItems().contains(param.getValue())) {
+                    doneList.getItems().add(param.getValue());
+                    profile.getDone().add(param.getValue().course.getCode());
+                } else if (!param.getValue().isDone() && doneList.getItems().contains(param.getValue())) {
+                    doneList.getItems().remove(param.getValue());
+                    profile.getDone().remove(param.getValue().course.getCode());
                 }
+                return param.getValue().done;
+            }
         );
         doneBoxes.setCellFactory(CheckBoxTableCell.forTableColumn(doneBoxes));
 
@@ -438,12 +435,8 @@ public class CourseScheduler extends Application {
      * @param sb2 the second scrollbar to bind.
      */
     private void bindScrollBars(ScrollBar sb1, ScrollBar sb2) {
-        sb1.valueProperty().addListener((src, ov, nv) -> {
-            sb2.setValue(nv.doubleValue() / sb1.getMax());
-        });
-        sb2.valueProperty().addListener((src, ov, nv) -> {
-            sb1.setValue(nv.doubleValue() * sb2.getMax());
-        });
+        sb1.valueProperty().addListener((src, ov, nv) -> sb2.setValue(nv.doubleValue() / sb1.getMax()));
+        sb2.valueProperty().addListener((src, ov, nv) -> sb1.setValue(nv.doubleValue() * sb2.getMax()));
     }
 
     /**
@@ -484,17 +477,14 @@ public class CourseScheduler extends Application {
         Scene scene = new Scene(gp);
 
         //Define task (scraping with message updates)
-        Task<Void> scrapeTask = new Task<Void>() {
+        Task<Void> scrapeTask = new Task<>() {
             @Override
-            public Void call() throws InterruptedException, IOException, SQLException {
-                Runnable timeUpdater = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            updateTime(lastRun, dtf);
-                        } catch(IOException ioe) {
-                            System.out.println(ioe.getMessage());
-                        }
+            public Void call() throws IOException, SQLException {
+                Runnable timeUpdater = () -> {
+                    try {
+                        updateTime(lastRun, dtf);
+                    } catch (IOException ioe) {
+                        System.out.println(ioe.getMessage());
                     }
                 };
                 updateMessage("Scraping...");
@@ -505,20 +495,14 @@ public class CourseScheduler extends Application {
             }
         };
         //Define behavior of buttons
-        EventHandler<ActionEvent> scrapeBtnPressed = new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent scrapeReq) {
-                Thread scrapeThread = new Thread(scrapeTask);
-                scrapeThread.setDaemon(true);
-                scrapeThread.start();
-                scrapeButton.setDisable(false);
-            }
+        EventHandler<ActionEvent> scrapeBtnPressed = scrapeReq -> {
+            Thread scrapeThread = new Thread(scrapeTask);
+            scrapeThread.setDaemon(true);
+            scrapeThread.start();
+            scrapeButton.setDisable(false);
         };
 
-        EventHandler<ActionEvent> backBtnPressed = new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent scrapeReq) {
-                cs.profileGUI(stage, courseList, cs);
-            }
-        };
+        EventHandler<ActionEvent> backBtnPressed = scrapeReq -> cs.profileGUI(stage, courseList, cs);
 
         //Configure dynamic scene elements.
         scrapeButton.setOnAction(scrapeBtnPressed);
@@ -540,66 +524,65 @@ public class CourseScheduler extends Application {
      * @param maxSemesters The maximum number of semesters to compute
      * @return returned The ordered list of Semesters, each containing an ordered list of Courses
      */
-    public List<Semester> cutOffCalc(Course[] orderedList, int maxCredits, int maxSemesters)
-    {
-		//Variables
-		int totalCount = 0;
-		List<Semester> returned = new ArrayList<Semester>();
-		Semester lastEntered = new Semester();
-		int numSemesters = (maxSemesters * maxCredits);
-		int i = 0;
-		
-		//Get Total Count
-		for (int j = 0; j < orderedList.length; j++)
-			totalCount += orderedList[j].getCredits();
-		
-		//Semester Counter
-		for (int j = 0; (numSemesters > 0 ); j++)
-		{
-			//Credit Counter
-			int numCredits = maxCredits;
-			Semester tempS = new Semester();
-			//Break #1
-			if (i >= orderedList.length)
-				break;
-			//Add to Semester
-			while ( (numCredits - orderedList[i].getCredits()) >= 0 )
-			{
-				if ( i == (orderedList.length - 1) )
-					break;
-				Course current = orderedList[i];
-				int credits = current.getCredits();
-				tempS.getSemester().add(current);
-				lastEntered = tempS;
-				numCredits -= credits;
-				i++;
-			}
-			//For Adding Last Course
-			if (maxCredits >= totalCount)
-			{
-				Course current = orderedList[i];
-				int credits = current.getCredits();
-				tempS.getSemester().add(current);
-				lastEntered = tempS;
-				numCredits -= credits;
-				i++;
-			}
-			//Break #2
-			if ( tempS.getSemester().isEmpty() )
-				break;
-			//Add to List of Semesters
-			returned.add(tempS);
-			numSemesters -= maxCredits;
-		}
-		
-		//For Adding Very Last Course
-		if ( i == (orderedList.length - 1) )
-		{
-			int index = returned.lastIndexOf(lastEntered);
-			Semester tempS = returned.get(index);
-			Course current = orderedList[i];
-			tempS.getSemester().add(current);
-		}
+    public List<Semester> cutOffCalc(Course[] orderedList, int maxCredits, int maxSemesters) {
+        //Variables
+        int totalCount = 0;
+        List<Semester> returned = new ArrayList<Semester>();
+        Semester lastEntered = new Semester();
+        int numSemesters = (maxSemesters * maxCredits);
+        int i = 0;
+    
+        //Get Total Count
+        for (int j = 0; j < orderedList.length; j++) {
+            totalCount += orderedList[j].getCredits();
+        }
+    
+        //Semester Counter
+        for (int j = 0; (numSemesters > 0); j++) {
+            //Credit Counter
+            int numCredits = maxCredits;
+            Semester tempS = new Semester();
+            //Break #1
+            if (i >= orderedList.length) {
+                break;
+            }
+            //Add to Semester
+            while ((numCredits - orderedList[i].getCredits()) >= 0) {
+                if (i == (orderedList.length - 1)) {
+                    break;
+                }
+                Course current = orderedList[i];
+                int credits = current.getCredits();
+                tempS.getSemester().add(current);
+                lastEntered = tempS;
+                numCredits -= credits;
+                i++;
+            }
+            //For Adding Last Course
+            if (maxCredits >= totalCount) {
+                Course current = orderedList[i];
+                int credits = current.getCredits();
+                tempS.getSemester().add(current);
+                lastEntered = tempS;
+                numCredits -= credits;
+                i++;
+            }
+            //Break #2
+            if (tempS.getSemester().isEmpty()) {
+                break;
+            }
+            //Add to List of Semesters
+            returned.add(tempS);
+            numSemesters -= maxCredits;
+        }
+    
+        //For Adding Very Last Course
+        if (i == (orderedList.length - 1)) {
+            int index = returned.lastIndexOf(lastEntered);
+            Semester tempS = returned.get(index);
+            Course current = orderedList[i];
+            tempS.getSemester().add(current);
+        }
 		return returned;
     }
     
@@ -631,7 +614,7 @@ public class CourseScheduler extends Application {
         RunAlgorithm runAlg = new RunAlgorithm();
         Course [] orderedList = runAlg.runAlgorithm(neededCourses);
         List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
-            
+        
         //GUI Interaction
         for (int i = 0; i < orderedSemesters.size(); i++)
         {

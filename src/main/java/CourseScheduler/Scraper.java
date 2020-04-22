@@ -24,8 +24,8 @@ public class Scraper {
 	
 	static final String URL = "https://catalog.gmu.edu/courses/";
 	
-	private Catalog catalog;
-	private Database db;
+	private final Catalog catalog;
+	private final Database db;
 	
 	public Scraper(Catalog catalog) {
 		this.catalog = catalog;
@@ -178,7 +178,6 @@ public class Scraper {
 					type = cm.group();
 				}
 			} else {
-				//				System.out.println("> Skip: " + block.charAt(0));
 				block = block.substring(1);
 			}
 		}

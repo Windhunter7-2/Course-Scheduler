@@ -8,8 +8,7 @@ import java.sql.SQLException;
 
 public class Database {
 	
-	private String name;
-	private Connection connection;
+	private final String name;
 	
 	public Database(String name) {
 		this.name = name;
@@ -25,12 +24,9 @@ public class Database {
 	/**
 	 * Creates this Database, if it doesn't exist already. This also establishes a connection to
 	 * the database, which can be accessed via {@link #get()}.
-	 *
-	 * @throws SQLException If an error occurs while trying to create the database.
 	 */
-	public void create() throws SQLException, IOException {
-		Path path = createPath();
-		connection = DriverManager.getConnection("jdbc:sqlite:" + path.toString());
+	public void create() throws IOException {
+		createPath();
 	}
 	
 	/**

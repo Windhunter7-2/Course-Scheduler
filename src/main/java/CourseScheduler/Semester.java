@@ -8,8 +8,7 @@ public class Semester {
 	/**
 	 * Constructor
 	 */
-	public Semester()
-	{
+	public Semester() {
 		semesterCourses = new ArrayList<Course>();
 	}
 	
@@ -20,11 +19,11 @@ public class Semester {
 	
 	/**
 	 * Getter for Semester
+	 *
 	 * @return semesterCourses
 	 */
-	public List<Course> getSemester()
-	{
+	public List<Course> getSemester() {
 		return semesterCourses;
 	}
-
+	
 }

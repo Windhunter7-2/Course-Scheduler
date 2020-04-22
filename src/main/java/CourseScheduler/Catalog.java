@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class Catalog {
 	
-	private Database db;
+	private final Database db;
 	private List<Course> courses = null;
 	
 	public Catalog(Database db) {
