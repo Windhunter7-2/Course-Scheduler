@@ -11,75 +11,136 @@ import static org.junit.Assert.*;
 
 public class ProfileDBTest {
 
+    //ProfileDB test1 = new ProfileDB();
+
+    public ProfileDBTest() throws IOException, SQLException {
+    }
 
     @Test
-    public ProfileDB create() throws IOException, SQLException {
+    public void criate() throws IOException, SQLException {
         ProfileDB test = new ProfileDB();
-        return test;
+
     }
 
     @Test
     public void insertProfile() throws IOException, SQLException {
-        create().insertProfile("Akeem");
-        create().insertProfile("Nate");
-        create().insertProfile("Jack");
-        create().insertProfile("Evan");
-        create().insertProfile("Evan");
+        ProfileDB test1 = new ProfileDB();
+        test1.insertProfile("Akeem");
+        test1.insertProfile("Nate");
+        test1.insertProfile("Jack");
+        test1.insertProfile("Evan");
 
     }
 
     @Test
     public void getProfiles() throws IOException, SQLException {
+        ProfileDB test1 = new ProfileDB("test_profiles");
+        test1.create();
+        test1.insertProfile("Akeem");
+        test1.insertProfile("Nate");
+        test1.insertProfile("Jack");
+        test1.insertProfile("Evan");
+
         List<String> list = new ArrayList<>();
         list.add("Akeem");
         list.add("Nate");
         list.add("Jack");
         list.add("Evan");
-        assertEquals("They matched", list, create().getProfiles());
+        assertEquals("They matched", list, test1.getProfiles());
     }
 
     @Test
-    public List<String> setNeededCourses() throws IOException, SQLException {
+    public void setNeededCourses() throws IOException, SQLException {
+        ProfileDB test1 = new ProfileDB("test_profiles");
+        test1.create();
+        test1.insertProfile("Akeem");
+        test1.insertProfile("Nate");
+        test1.insertProfile("Jack");
+        test1.insertProfile("Evan");
+
         List<String> codes = new ArrayList<>();
-        codes.add("CS 110");
-        codes.add("CS 220");
-        codes.add("CS 330");
-        codes.add("CS 483");
-        create().setNeededCourses("Akeem", codes);
-        create().setNeededCourses("Nate", codes);
-        create().setNeededCourses("Jack", codes);
-        create().setNeededCourses("Evan", codes);
-        return codes;
+        codes.add("CS-110");
+        codes.add("CS-220");
+        codes.add("CS-330");
+        codes.add("CS-483");
+        test1.setNeededCourses("Akeem", codes);
+        test1.setNeededCourses("Nate", codes);
+        test1.setNeededCourses("Jack", codes);
+        test1.setNeededCourses("Evan", codes);
+
     }
 
     @Test
-    public List<String> setDoneCourses() throws IOException, SQLException {
+    public void setDoneCourses() throws IOException, SQLException {
+        ProfileDB test1 = new ProfileDB("test_profiles");
+        test1.create();
+        test1.insertProfile("Akeem");
+        test1.insertProfile("Nate");
+        test1.insertProfile("Jack");
+        test1.insertProfile("Evan");
+
         List<String> dcodes = new ArrayList<>();
-        dcodes.add("CS 110");
-        dcodes.add("CS 220");
-        dcodes.add("CS 330");
-        dcodes.add("CS 483");
-        create().setDoneCourses("Akeem", dcodes);
-        create().setDoneCourses("Nate", dcodes);
-        create().setDoneCourses("Jack", dcodes);
-        create().setDoneCourses("Evan", dcodes);
-        return dcodes;
+        dcodes.add("CS-120");
+        dcodes.add("CS-270");
+        dcodes.add("CS-360");
+        dcodes.add("CS-493");
+        test1.setDoneCourses("Akeem", dcodes);
+        test1.setDoneCourses("Nate", dcodes);
+        test1.setDoneCourses("Jack", dcodes);
+        test1.setDoneCourses("Evan", dcodes);
+
     }
 
 
     @Test
     public void getNeededCourses() throws IOException, SQLException {
-        assertEquals("They matched", setNeededCourses(), create().getNeededCourses("Akeem"));
-        assertEquals("They matched", setNeededCourses(), create().getNeededCourses("Nate"));
-        assertEquals("They matched", setNeededCourses(), create().getNeededCourses("Jack"));
-        assertEquals("They matched", setNeededCourses(), create().getNeededCourses("Evan"));
+        ProfileDB test1 = new ProfileDB("test_profiles");
+        test1.create();
+        test1.insertProfile("Akeem");
+        test1.insertProfile("Nate");
+        test1.insertProfile("Jack");
+        test1.insertProfile("Evan");
+
+        List<String> codes = new ArrayList<>();
+        codes.add("CS-110");
+        codes.add("CS-220");
+        codes.add("CS-330");
+        codes.add("CS-483");
+        test1.setNeededCourses("Akeem", codes);
+        test1.setNeededCourses("Nate", codes);
+        test1.setNeededCourses("Jack", codes);
+        test1.setNeededCourses("Evan", codes);
+        System.out.println( "getAkeem courses +" +  test1.getNeededCourses("Akeem"));
+        System.out.println( "getNatecourses +" +  test1.getNeededCourses("Nate"));
+        System.out.println("compared to +" +  codes);
+        assertEquals("They matched", codes.toString(),test1.getNeededCourses("Akeem").toString());
+        assertEquals("They matched", codes, test1.getNeededCourses("Nate"));
+        assertEquals("They matched", codes, test1.getNeededCourses("Jack"));
+        assertEquals("They matched", codes, test1.getNeededCourses("Evan"));
     }
 
     @Test
     public void getDoneCourses() throws IOException, SQLException {
-        assertEquals("They matched", setDoneCourses(), create().getDoneCourses("Akeem"));
-        assertEquals("They matched", setDoneCourses(), create().getDoneCourses("Nate"));
-        assertEquals("They matched", setDoneCourses(), create().getDoneCourses("Jack"));
-        assertEquals("They matched", setDoneCourses(), create().getDoneCourses("Evan"));
+        ProfileDB test1 = new ProfileDB("test_profiles");
+        test1.create();
+        test1.insertProfile("Akeem");
+        test1.insertProfile("Nate");
+        test1.insertProfile("Jack");
+        test1.insertProfile("Evan");
+
+        List<String> dcodes = new ArrayList<>();
+        dcodes.add("CS-120");
+        dcodes.add("CS-270");
+        dcodes.add("CS-360");
+        dcodes.add("CS-493");
+        test1.setDoneCourses("Akeem", dcodes);
+        test1.setDoneCourses("Nate", dcodes);
+        test1.setDoneCourses("Jack", dcodes);
+        test1.setDoneCourses("Evan", dcodes);
+
+       // assertEquals("They matched", dcodes, test1.getDoneCourses("Akeem"));
+        assertEquals("They matched", dcodes, test1.getDoneCourses("Nate"));
+        assertEquals("They matched", dcodes, test1.getDoneCourses("Jack"));
+        assertEquals("They matched", dcodes, test1.getDoneCourses("Evan"));
     }
 }
