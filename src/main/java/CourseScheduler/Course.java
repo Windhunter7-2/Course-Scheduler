@@ -13,7 +13,7 @@ public class Course {
 	/**
 	 * The shortened name of the course, eg "CS 321"
 	 */
-	private final String name;
+	private String name;
 	
 	/**
 	 * The type of the course, eg "CS" or "MATH" etc
@@ -33,7 +33,7 @@ public class Course {
 	/**
 	 * The informal code for the course, which combines the type and number, eg "CS-321"
 	 */
-	private final String code;
+	private String code;
 	
 	/**
 	 * A list of course codes that are immediate prerequisites for this course. This list might overlap
@@ -52,9 +52,9 @@ public class Course {
 	private int flag;
 	
 	/**
-	 * A string representation of the parents, eg "(CS-110&MATH-125)|MATH-113"
+	 * A string representation of the parents, eg "(CS110 & MATH125) | MATHXYZ"
 	 */
-	private final String parents;
+	private String parents;
 	
 	public Course(String fullName, String name, String type, int credits, String desc, String code, List<String> prereqs, List<String> coreqs, int flag, String parents) {
 		this.fullName = fullName;
@@ -69,25 +69,16 @@ public class Course {
 		this.parents = parents;
 	}
 	
-	public Course(Course other) {
-		this.fullName = other.fullName;
-		this.name = other.name;
-		this.type = other.type;
-		this.credits = other.credits;
-		this.desc = other.desc;
-		this.code = other.code;
-		this.prerequisites = other.prerequisites;
-		this.coreqs = other.coreqs;
-		this.flag = other.flag;
-		this.parents = other.parents;
-	}
-	
 	public String getFullName() {
 		return fullName;
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public String getType() {
@@ -104,6 +95,10 @@ public class Course {
 	
 	public String getCode() {
 		return code;
+	}
+	
+	public void setCode(String code) {
+		this.code = code;
 	}
 	
 	public List<String> getPrerequisites() {
@@ -125,6 +120,10 @@ public class Course {
 	
 	public String getParents() {
 		return parents;
+	}
+	
+	public void setParents(String parents) {
+		this.parents = parents;
 	}
 	
 	@Override
@@ -168,5 +167,4 @@ public class Course {
 	public int hashCode() {
 		return Objects.hash(fullName, name, type, credits, desc, code, prerequisites, coreqs, flag, parents);
 	}
-
 }
