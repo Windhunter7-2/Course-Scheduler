@@ -948,19 +948,19 @@ public class RunAlgorithm {
 		List<String> prereqsOfB = new ArrayList<String>();
 		prereqsOfB.add("Test-E");
 		prereqsOfB.add("Test-F");
-		prereqsOfA.add("Test-I");
+		prereqsOfB.add("Test-I");
 		Course courseB = new Course("", "Test B", "", 3, "", "Test-B", prereqsOfB, new ArrayList<String>(), -999, "Test-E&Test-F&Test-I");
 		
 		List<String> prereqsOfC = new ArrayList<String>();
 		prereqsOfC.add("Test-G");
 		prereqsOfC.add("Test-H");
-		prereqsOfA.add("Test-J");
+		prereqsOfC.add("Test-J");
 		Course courseC = new Course("", "Test C", "", 3, "", "Test-C", prereqsOfC, new ArrayList<String>(), -999, "Test-G|Test-H|Test-J");
 		
 		List<String> prereqsOfD = new ArrayList<String>();
 		prereqsOfD.add("Test-G");
 		prereqsOfD.add("Test-H");
-		prereqsOfA.add("Test-K");
+		prereqsOfD.add("Test-K");
 		Course courseD = new Course("", "Test D", "", 3, "", "Test-D", prereqsOfD, new ArrayList<String>(), -999, "Test-G&Test-H&Test-K");
 		
 		List<String> prereqsOfE = new ArrayList<String>();
