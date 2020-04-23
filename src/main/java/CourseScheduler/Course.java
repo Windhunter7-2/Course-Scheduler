@@ -52,7 +52,7 @@ public class Course {
 	private int flag;
 	
 	/**
-	 * A string representation of the parents, eg "(CS110 & MATH125) | MATHXYZ"
+	 * A string representation of the parents, eg "(CS-110&MATH-125)|(MATH-110)"
 	 */
 	private String parents;
 	
@@ -69,6 +69,19 @@ public class Course {
 		this.parents = parents;
 	}
 	
+	public Course(Course other) {
+		this.fullName = other.fullName;
+		this.name = other.name;
+		this.type = other.type;
+		this.credits = other.credits;
+		this.desc = other.desc;
+		this.code = other.code;
+		this.prerequisites = other.prerequisites;
+		this.coreqs = other.coreqs;
+		this.flag = other.flag;
+		this.parents = other.parents;
+	}
+
 	public String getFullName() {
 		return fullName;
 	}
