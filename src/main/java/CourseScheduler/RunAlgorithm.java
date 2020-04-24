@@ -937,31 +937,25 @@ public class RunAlgorithm {
 		prereqsOfA.add("Test-E");
 		prereqsOfA.add("Test-B");
 		prereqsOfA.add("Test-C");
-		prereqsOfA.add("Test-I");
-		prereqsOfA.add("Test-J");
-		prereqsOfA.add("Test-K");
 		List<String> coreqA = new ArrayList<String>();
 		coreqA.add("Test-Z");
 		Course courseA = new Course("fullName", "Test A", "type", 4, "desc", "Test-A", prereqsOfA, coreqA, -999,
-				"(Test-B|Test-C)&(Test-F|Test-E)&(Test-I|Test-J)&(Test-K)");
+				"(Test-B|Test-C)&(Test-F|Test-E)");
 		
 		List<String> prereqsOfB = new ArrayList<String>();
 		prereqsOfB.add("Test-E");
 		prereqsOfB.add("Test-F");
-		prereqsOfB.add("Test-I");
-		Course courseB = new Course("", "Test B", "", 3, "", "Test-B", prereqsOfB, new ArrayList<String>(), -999, "Test-E&Test-F&Test-I");
+		Course courseB = new Course("", "Test B", "", 3, "", "Test-B", prereqsOfB, new ArrayList<String>(), -999, "Test-E&Test-F");
 		
 		List<String> prereqsOfC = new ArrayList<String>();
 		prereqsOfC.add("Test-G");
 		prereqsOfC.add("Test-H");
-		prereqsOfC.add("Test-J");
-		Course courseC = new Course("", "Test C", "", 3, "", "Test-C", prereqsOfC, new ArrayList<String>(), -999, "Test-G|Test-H|Test-J");
+		Course courseC = new Course("", "Test C", "", 3, "", "Test-C", prereqsOfC, new ArrayList<String>(), -999, "Test-G|Test-H");
 		
 		List<String> prereqsOfD = new ArrayList<String>();
 		prereqsOfD.add("Test-G");
 		prereqsOfD.add("Test-H");
-		prereqsOfD.add("Test-K");
-		Course courseD = new Course("", "Test D", "", 3, "", "Test-D", prereqsOfD, new ArrayList<String>(), -999, "Test-G&Test-H&Test-K");
+		Course courseD = new Course("", "Test D", "", 3, "", "Test-D", prereqsOfD, new ArrayList<String>(), -999, "Test-G&Test-H");
 		
 		List<String> prereqsOfE = new ArrayList<String>();
 		prereqsOfE.add("Test-F");
@@ -976,15 +970,6 @@ public class RunAlgorithm {
 		
 		List<String> prereqsOfF = new ArrayList<String>();
 		Course courseF = new Course("", "Test F", "", 1, "", "Test-F", prereqsOfF, new ArrayList<String>(), -999, "");
-		
-		List<String> prereqsOfI = new ArrayList<String>();
-		Course courseI = new Course("", "Test I", "", 1, "", "Test-I", prereqsOfI, new ArrayList<String>(), -999, "");
-		
-		List<String> prereqsOfJ = new ArrayList<String>();
-		Course courseJ = new Course("", "Test J", "", 1, "", "Test-J", prereqsOfJ, new ArrayList<String>(), -999, "");
-		
-		List<String> prereqsOfK = new ArrayList<String>();
-		Course courseK = new Course("", "Test K", "", 1, "", "Test-K", prereqsOfK, new ArrayList<String>(), -999, "");
 		
 		List<String> prereqsOfZ = new ArrayList<String>();
 		List<String> coreqZ = new ArrayList<String>();
@@ -1001,9 +986,6 @@ public class RunAlgorithm {
 		test.add(courseC);
 		test.add(courseB);
 		test.add(courseA);
-		test.add(courseI);
-		test.add(courseJ);
-		test.add(courseK);
 		return test;
 	}
 
