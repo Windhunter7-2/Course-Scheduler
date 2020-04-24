@@ -94,7 +94,16 @@ public class ProfileDB {
 			e.printStackTrace();
 		}
 	}
-	
+	public void deleteProfile(String name) {
+		try (Connection conn = db.get();
+			 PreparedStatement st = conn.prepareStatement("DELETE FROM " + PROFILES_TABLE + " WHERE user_name = ?;")) {
+			st.setString(1, name);
+			st.execute();
+		} catch (SQLException | IOException e) {
+			e.printStackTrace();
+		}
+
+	}
 	public List<String> getProfiles() {
     	String sql = "SELECT user_name FROM profiles;";
 		List<String> strs = new ArrayList<>();

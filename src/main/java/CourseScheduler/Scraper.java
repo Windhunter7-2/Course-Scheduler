@@ -66,7 +66,7 @@ public class Scraper {
 	 * @throws IOException If something goes wrong scraping.
 	 */
 	private List<String> scrapeCatalogList() throws IOException {
-		Document doc = Jsoup.parse(new java.net.URL(URL), 3000);
+		Document doc = Jsoup.parse(new java.net.URL(URL), 30000);
 		
 		// This block of code gets links to all the catalogs
 		List<String> catalogs = new ArrayList<>();
@@ -85,7 +85,7 @@ public class Scraper {
 	 * @param link The absolute link of the catalog.
 	 */
 	private List<Course> scrapeCourses(String link) throws IOException {
-		Document doc = Jsoup.parse(new java.net.URL(link), 3000);
+		Document doc = Jsoup.parse(new java.net.URL(link), 30000);
 		return doc.select(".courseblock").stream().map(Scraper::scrapeCourse).collect(Collectors.toList());
 	}
 	

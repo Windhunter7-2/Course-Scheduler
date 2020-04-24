@@ -69,15 +69,20 @@ public class CourseScheduler extends Application {
         }
     
         ComboBox<String> selectprofile = new ComboBox();
-        Label welcomeLabel = new Label("Welcome To Course Scheduler");
+        selectprofile.setPrefSize(300, 80);
+        selectprofile.setStyle("-fx-font-size:30");
+
+        Label welcomeLabel = new Label("Welcome To Course Scheduler \n Select Your Profile Below:");
+        welcomeLabel.setStyle("-fx-font-size:30");
+
         Button btnContinue = new Button("Continue");
-//        btnContinue.setOnAction(e-> {
-//            try {
-//                checkListGUI(courseList, prof, stage, cs);
-//            } catch (SQLException ex) {
-//                ex.printStackTrace();
-//            }
-//        });
+        btnContinue.setPrefSize(300, 80);
+        btnContinue.setStyle("-fx-font-size:30");
+
+        Button btnRemove = new Button("Remove Selected");
+        btnRemove.setPrefSize(300, 80);
+        btnRemove.setStyle("-fx-font-size:30");
+
         // create a text input dialog
         TextInputDialog td = new TextInputDialog();
         // setHeaderText
@@ -89,9 +94,17 @@ public class CourseScheduler extends Application {
             //Creates a new profile when "create new profile" isselected from the combo box
             if(value.equals("Create New Profile")) {
                 td.showAndWait();
-                selectprofile.getItems().add(td.getEditor().getText());
+                /*prevents empty strings*/
+                if(!td.getEditor().getText().isEmpty())
+                    selectprofile.getItems().add(td.getEditor().getText());
             }
         };
+       /*Profile.db.deleteProfile("Create New Profile");*/
+        selectprofile.getItems().add("Create New Profile");
+
+        selectprofile.getItems().addAll(Profile.db.getProfiles());
+        selectprofile.setOnAction(event);
+       // selectprofile.setOnAction(e->loadProfile());
         btnContinue.setOnAction(e-> {
             try {
                 checkListGUI(courseList, Profile.load(selectprofile.getValue()), stage, cs);
@@ -99,13 +112,26 @@ public class CourseScheduler extends Application {
                 ex.printStackTrace();
             }
         });
+        btnRemove.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final int selectedIdx = selectprofile.getSelectionModel().getSelectedIndex();
+                if (selectedIdx != -1) {
+                    String itemToRemove = selectprofile.getSelectionModel().getSelectedItem();
 
-        selectprofile.getItems().add("Create New Profile");
-        //selectprofile.setOnAction(e->createnewprofile(selectprofile));
-        selectprofile.getItems().addAll(Profile.db.getProfiles());
-        selectprofile.setOnAction(event);
-       // selectprofile.setOnAction(e->loadProfile());
-
+                    final int newSelectedIdx =
+                            (selectedIdx == selectprofile.getItems().size() - 1)
+                                    ? selectedIdx - 1
+                                    : selectedIdx;
+                    /*prevents create new profile from being deleted*/
+                    if(!selectprofile.getSelectionModel().getSelectedItem().equals("Create New Profile")){
+                        selectprofile.getItems().remove(selectedIdx);
+                        Profile.db.deleteProfile((String) selectprofile.getSelectionModel().getSelectedItem());
+                    //status.setText("Removed " + itemToRemove);
+                        selectprofile.getSelectionModel().select(newSelectedIdx);
+                    }
+                }
+            }
+        });
         // primaryStage.setScene(new Scene(root, 300, 275));
         pane.setAlignment(Pos.CENTER);
         pane.setHgap(10);
@@ -115,8 +141,11 @@ public class CourseScheduler extends Application {
         pane.add(selectprofile, 0, 1);
         pane.add(welcomeLabel, 0, 0);
         pane.add(btnContinue, 1,1 );
+        pane.add(btnRemove, 1,2 );
         //pane.getChildren().addAll(selectprofile);
+        stage.setMaximized(true);
         stage.setScene(new Scene(pane, 300, 275));
+        stage.setTitle("Select Profile");
         stage.centerOnScreen();
         stage.show();
     }
@@ -391,6 +420,7 @@ public class CourseScheduler extends Application {
         HBox grandHBox = new HBox(5, optionsVBox, tableSearchVBox, neededDoneVBox);
         grandHBox.setPadding(new Insets(10, 10, 10, 10));
         ((Group)scene.getRoot()).getChildren().addAll(grandHBox);
+
         stage.setScene(scene);
         stage.centerOnScreen();
         stage.show();
@@ -464,6 +494,7 @@ public class CourseScheduler extends Application {
                         System.out.println(ioe.getMessage());
                     }
                 };
+                try{
                 scraper.run(u -> {
                     System.out.println(u.getPercent());
                     if(u.getPercent() != null) {
@@ -471,6 +502,7 @@ public class CourseScheduler extends Application {
                     }
                     updateMessage(u.getMessage());
                 });
+                }catch (Exception e){ e.printStackTrace();}
                 updateMessage("Scraping Complete");
                 Platform.runLater(timeUpdater);
                 succeeded();
