@@ -95,13 +95,21 @@ public class CourseScheduler extends Application {
             if(value.equals("Create New Profile")) {
                 td.showAndWait();
                 /*prevents empty strings*/
-                if(!td.getEditor().getText().isEmpty())
+                if(!td.getEditor().getText().isEmpty()) {
                     selectprofile.getItems().add(td.getEditor().getText());
+                    //Profile.db.insertProfile(td.getEditor().getText());
+                    try {
+                        Profile.load(td.getEditor().getText());
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
         };
-       /*Profile.db.deleteProfile("Create New Profile");*/
+       Profile.db.deleteProfile(" ");
         selectprofile.getItems().add("Create New Profile");
-
         selectprofile.getItems().addAll(Profile.db.getProfiles());
         selectprofile.setOnAction(event);
        // selectprofile.setOnAction(e->loadProfile());
@@ -112,20 +120,22 @@ public class CourseScheduler extends Application {
                 ex.printStackTrace();
             }
         });
+
         btnRemove.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
-                final int selectedIdx = selectprofile.getSelectionModel().getSelectedIndex();
+                int selectedIdx = selectprofile.getSelectionModel().getSelectedIndex();
                 if (selectedIdx != -1) {
                     String itemToRemove = selectprofile.getSelectionModel().getSelectedItem();
 
-                    final int newSelectedIdx =
+                    int newSelectedIdx =
                             (selectedIdx == selectprofile.getItems().size() - 1)
                                     ? selectedIdx - 1
                                     : selectedIdx;
                     /*prevents create new profile from being deleted*/
                     if(!selectprofile.getSelectionModel().getSelectedItem().equals("Create New Profile")){
+                        Profile.db.deleteProfile( selectprofile.getSelectionModel().getSelectedItem());
                         selectprofile.getItems().remove(selectedIdx);
-                        Profile.db.deleteProfile((String) selectprofile.getSelectionModel().getSelectedItem());
+
                     //status.setText("Removed " + itemToRemove);
                         selectprofile.getSelectionModel().select(newSelectedIdx);
                     }

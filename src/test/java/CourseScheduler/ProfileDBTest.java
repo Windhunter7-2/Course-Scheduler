@@ -33,6 +33,15 @@ public class ProfileDBTest {
     }
 
     @Test
+    public void deleteProfile() throws IOException, SQLException {
+        ProfileDB test1 = new ProfileDB();
+        test1.insertProfile("Akeem");
+        test1.deleteProfile("Akeem");
+
+
+    }
+
+    @Test
     public void getProfiles() throws IOException, SQLException {
         ProfileDB test1 = new ProfileDB("test_profiles");
         test1.create();
@@ -41,11 +50,14 @@ public class ProfileDBTest {
         test1.insertProfile("Jack");
         test1.insertProfile("Evan");
 
+        /*test1.deleteProfile("Akeem");*/
         List<String> list = new ArrayList<>();
-        list.add("Akeem");
+       // list.add("Akeem");
         list.add("Nate");
         list.add("Jack");
         list.add("Evan");
+        list.add("Akeem");
+        System.out.println( "profiles in db +" +  test1.getProfiles());
         assertEquals("They matched", list, test1.getProfiles());
     }
 
