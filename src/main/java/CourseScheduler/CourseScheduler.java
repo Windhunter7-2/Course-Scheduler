@@ -888,9 +888,7 @@ public class CourseScheduler extends Application {
 		gp.getColumnConstraints().add(colCon);
 		
 		//Set Window Size and Scene
-//		stage.setMaximized(true);
-		stage.setMinHeight(GUIHEIGHT);
-		stage.setMinWidth(GUIWIDTH);
+		stage.setMaximized(true);
 		Scene scene = new Scene(gp);	//Copy of Panel; Required
 		
 		//Event Handlers for Buttons
