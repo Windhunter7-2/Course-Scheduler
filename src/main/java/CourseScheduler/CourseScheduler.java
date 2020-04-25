@@ -847,7 +847,13 @@ public class CourseScheduler extends Application {
 			Label semLabel = new Label(semNum);
 			semLabel.setStyle("-fx-font-size:14");
 			semester.getChildren().add(semLabel);
-			int numLines = 2;
+			//Initialize Adding Line
+			VBox line = new VBox();
+			line.setAlignment(Pos.CENTER);
+			Label lineSegA = new Label("   |   ");
+			Label lineSegB = new Label("   |   ");
+			line.getChildren().add(lineSegA);
+			line.getChildren().add(lineSegB);
 			//Algorithmic Part
 			List<Course> tempS = orderedSemesters.get(i).getSemester();
 			for (int j = 0; j < tempS.size(); j++)
@@ -862,15 +868,12 @@ public class CourseScheduler extends Application {
 				Label courseLabel = new Label(totalName);
 				courseLabel.setStyle("-fx-font-size:12");
 				semester.getChildren().add(courseLabel);
-				//Add Line
-				numLines += 2;
+				//Add Line Segments
+				Label lineSegC = new Label("   |   ");
+				Label lineSegD = new Label("   |   ");
+				line.getChildren().add(lineSegC);
+				line.getChildren().add(lineSegD);
 			}
-			//Create Line
-			VBox line = new VBox();
-			line.setAlignment(Pos.CENTER);
-			Label lineSeg = new Label("   |   ");
-			for (int j = 0; j < numLines; j++)
-				line.getChildren().add(lineSeg);
 			//Add Line and Semester to Total
 			semesters.getChildren().add(semester);
 			semesters.getChildren().add(line);
