@@ -684,8 +684,8 @@ public class CourseScheduler extends Application {
 		backButton.setPrefSize(150, 60);	//Size of Button
 		backButton.setStyle("-fx-font-size:18");	//Font Size of Button
 		Button homeButton = new Button("Home");
-		backButton.setPrefSize(150, 60);	//Size of Button
-		backButton.setStyle("-fx-font-size:18");	//Font Size of Button
+		homeButton.setPrefSize(150, 60);	//Size of Button
+		homeButton.setStyle("-fx-font-size:18");	//Font Size of Button
 		stage.setTitle("Generated Schedule");	//Title of Window
 		GridPane gp = new GridPane();	//A Pane to List Elements
 		gp.setAlignment(Pos.CENTER);	//Center on Screen
@@ -699,15 +699,6 @@ public class CourseScheduler extends Application {
 		buttons.setAlignment(Pos.CENTER);
 		semesters.setAlignment(Pos.CENTER);
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		//If NO Needed Courses, Return
 		if (neededCourses.size() < 1)
 		{
@@ -716,19 +707,9 @@ public class CourseScheduler extends Application {
 			try {
 				cs.checkListGUI(courseList, profile, stage, cs);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		//Swap Name and Code
 		for (int i = 0; i < neededCourses.size(); i++)
@@ -861,11 +842,11 @@ public class CourseScheduler extends Application {
 		{
 			//Make Similar Semester Box
 			VBox semester = new VBox(10);
-			semester.setAlignment(Pos.CENTER);
 			String semNum = ( "Semester #" + (i + 1) );
 			Label semLabel = new Label(semNum);
 			semLabel.setStyle("-fx-font-size:14");
 			semester.getChildren().add(semLabel);
+			int numLines = 2;
 			//Algorithmic Part
 			List<Course> tempS = orderedSemesters.get(i).getSemester();
 			for (int j = 0; j < tempS.size(); j++)
@@ -880,12 +861,15 @@ public class CourseScheduler extends Application {
 				Label courseLabel = new Label(totalName);
 				courseLabel.setStyle("-fx-font-size:12");
 				semester.getChildren().add(courseLabel);
+				//Add Line
+				numLines += 2;
 			}
 			//Create Line
 			VBox line = new VBox();
 			line.setAlignment(Pos.CENTER);
-			Label lineSeg = new Label("|");
-			line.getChildren().add(lineSeg);
+			Label lineSeg = new Label("   |   ");
+			for (int j = 0; j < numLines; j++)
+				line.getChildren().add(lineSeg);
 			//Add Line and Semester to Total
 			semesters.getChildren().add(semester);
 			semesters.getChildren().add(line);
@@ -904,7 +888,9 @@ public class CourseScheduler extends Application {
 		gp.getColumnConstraints().add(colCon);
 		
 		//Set Window Size and Scene
-		stage.setMaximized(true);
+//		stage.setMaximized(true);
+		stage.setMinHeight(GUIHEIGHT);
+		stage.setMinWidth(GUIWIDTH);
 		Scene scene = new Scene(gp);	//Copy of Panel; Required
 		
 		//Event Handlers for Buttons
@@ -914,7 +900,6 @@ public class CourseScheduler extends Application {
 				try {
 					cs.checkListGUI(courseList, profile, stage, cs);
 				} catch (SQLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
