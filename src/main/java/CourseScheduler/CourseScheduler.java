@@ -713,7 +713,12 @@ public class CourseScheduler extends Application {
 		{
 			JOptionPane.showMessageDialog(null, "You did not select any courses that are \"needed\", and so "
 					+ "you are returning to the checklist, to add some courses. Please press Ok to continue.");
-			cs.checkListGUI(courseList, profile, stage, cs);
+			try {
+				cs.checkListGUI(courseList, profile, stage, cs);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		
@@ -906,7 +911,12 @@ public class CourseScheduler extends Application {
 		//Back Button
 		EventHandler<ActionEvent> backBtnPressed = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent backBtn) {
-				cs.checkListGUI(courseList, profile, stage, cs);
+				try {
+					cs.checkListGUI(courseList, profile, stage, cs);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		};
 		backButton.setOnAction(backBtnPressed);	//Associates the Button
