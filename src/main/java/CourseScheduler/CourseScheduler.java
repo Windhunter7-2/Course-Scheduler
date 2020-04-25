@@ -35,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import javax.swing.JOptionPane;
 
 public class CourseScheduler extends Application {
     
@@ -46,13 +47,16 @@ public class CourseScheduler extends Application {
         catalog = new Catalog(new Database("catalog"));
         scraper = new Scraper(catalog);
 
+	//CURRENTLY TESTING GENERATESCHEDULE() BY ITSELF
+
         if (Profile.db == null) {
             Profile.db = new ProfileDB().create();
         }
         if (scraper.needsToRun()) {
             scraperGUI(primaryStage, this);
         } else {
-            profileGUI(primaryStage, this);
+		generateSchedule(null, null, null, 0, 0, null, primaryStage, this);
+//            profileGUI(primaryStage, this);
         }
     }
     
@@ -421,7 +425,7 @@ public class CourseScheduler extends Application {
             for(int i = 0; i < profile.getDone().size(); i++) {
                 doneCourseList.add(getCourseByCode(courseList, profile.getDone().get(i)));
             }
-            generateSchedule(neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters(), profile, stage, cs);
+            generateSchedule(courseList, neededCourseList, doneCourseList, profile.getNumCredits(), profile.getNumSemesters(), profile, stage, cs);
         });
         VBox optionsVBox = new VBox();
         optionsVBox.setSpacing(12);
@@ -631,38 +635,292 @@ public class CourseScheduler extends Application {
      * displays the classes in a semesterly fashion, as part of a GUI, and in this GUI, the user can also click
      * the "Back" button to go back to the previous step of the checklist (selectProfileInit()), or the "Home"
      * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
+     * @param courseList The list of all Courses
+     * @param neededCourses The list of needed Courses for the user to take
+     * @param doneCourses The list of Courses the user has already done
+     * @param maxCredits The maximum number of credits per semester
+     * @param maxSemesters The maximum number of semesters
+     * @param profile The user's profile
+     * @param stage The stage on which to display this GUI
+     * @param cs the instance of CourseScheduler calling this method.
      */
-    public void generateSchedule(List<Course> neededCourses, List<Course> doneCourses, int maxCredits, int maxSemesters,
-    		Profile profile, Stage stage, CourseScheduler cs)
+    public void generateSchedule(List<Course> courseList, List<Course> neededCourses, List<Course> doneCourses,
+    		int maxCredits, int maxSemesters, Profile profile, Stage stage, CourseScheduler cs)
     {
-    	//Remove Done Courses
-    	for (int i = 0; i < neededCourses.size(); i++)
-    	{
-    		Course current = neededCourses.get(i);
-    		for (int j = 0; j < doneCourses.size(); j++)
-    		{
-    			Course curDone = doneCourses.get(j);
-        		if (current.getPrerequisites().contains(curDone))
-        			neededCourses.get(i).getPrerequisites().remove(j);
-    		}
-    	}
-    	
-        //Algorithm
-        RunAlgorithm runAlg = new RunAlgorithm();
-        Course [] orderedList = runAlg.runAlgorithm(neededCourses);
-        List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
-        
-        //GUI Interaction
-        for (int i = 0; i < orderedSemesters.size(); i++)
-        {
-            Semester tempS = orderedSemesters.get(i);
-            for (int j = 0; j < tempS.getSemester().size(); j++)
-            {
-                Course tempC = tempS.getSemester().get(j);
-                System.out.println("PUT CODE HERE FOR DISPLAYING THE COURSE");
-            }
-            System.out.println("PUT CODE HERE FOR SEPARATOR FOR THE DIFFERENT SEMESTERS");
-        }
+		//Null Fix
+		if (neededCourses == null)
+			neededCourses = new ArrayList<Course>();
+		if (doneCourses == null)
+			doneCourses = new ArrayList<Course>();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//TEST CASE (FOR INDIVIDUAL TESTING) -> DELETE AFTER TEST!!!
+		//NOTE: <ALREADY> TESTED REMOVAL OF DONE, AND WORKS!!!
+		maxCredits = 5;
+		maxSemesters = 100;
+		RunAlgorithm forTesting = new RunAlgorithm();
+		neededCourses = forTesting.testListOfCourses();
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//GUI Initialization
+		Button backButton = new Button("Back");
+		backButton.setPrefSize(150, 60);	//Size of Button
+		backButton.setStyle("-fx-font-size:18");	//Font Size of Button
+		Button homeButton = new Button("Home");
+		backButton.setPrefSize(150, 60);	//Size of Button
+		backButton.setStyle("-fx-font-size:18");	//Font Size of Button
+		stage.setTitle("Generated Schedule");	//Title of Window
+		GridPane gp = new GridPane();	//A Pane to List Elements
+		gp.setAlignment(Pos.CENTER);	//Center on Screen
+		gp.setVgap(200);	//Distance Between Buttons, etc.
+		
+		//VBox and HBox Setup (Main)
+		VBox fullGUI = new VBox(10);
+		HBox buttons = new HBox(10);
+		HBox semesters = new HBox(10);
+		fullGUI.setAlignment(Pos.CENTER);
+		buttons.setAlignment(Pos.CENTER);
+		semesters.setAlignment(Pos.CENTER);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//If NO Needed Courses, Return
+		if (neededCourses.size() < 1)
+		{
+			JOptionPane.showMessageDialog(null, "You did not select any courses that are \"needed\", and so "
+					+ "you are returning to the checklist, to add some courses. Please press Ok to continue.");
+			cs.checkListGUI(courseList, profile, stage, cs);
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//Swap Name and Code
+		for (int i = 0; i < neededCourses.size(); i++)
+		{
+			String tempName = neededCourses.get(i).getName();
+			neededCourses.get(i).setName( neededCourses.get(i).getCode() );
+			neededCourses.get(i).setCode(tempName);
+		}
+		
+		//Remove Done Courses from Prerequisites and Parents
+		for (int i = 0; i < neededCourses.size(); i++)
+		{
+			Course current = neededCourses.get(i);
+			for (int j = 0; j < doneCourses.size(); j++)
+			{
+				Course curDone = doneCourses.get(j);
+				if ( (current.getPrerequisites().contains(curDone.getName())) ||
+						(current.getPrerequisites().contains(curDone.getCode())) )
+				{
+					//Remove from Prerequisites
+					String removedA = curDone.getName();
+					String removedB = curDone.getCode();
+					neededCourses.get(i).getPrerequisites().remove( removedA );
+					neededCourses.get(i).getPrerequisites().remove( removedB );
+					//Remove from Parents -> Start
+					String parentString = current.getParents();
+					parentString = parentString.replaceAll(removedA, "");
+					parentString = parentString.replaceAll(removedB, "");
+					current.setParents(parentString);
+				}
+			}
+			String parentString = current.getParents();
+			if ( !parentString.equals("") )
+			{
+				//Remove from Parents -> Leftovers (Part A; Duplicate Symbols)
+				parentString = parentString.replaceAll("&&", "&");
+				parentString = parentString.replaceAll("\\|\\|", "\\|");
+				//Remove from Parents -> Leftovers (Part B; Symbols & Parentheses)
+				parentString = parentString.replaceAll("\\(&", "\\(");
+				parentString = parentString.replaceAll("\\(\\|", "\\(");
+				parentString = parentString.replaceAll("&\\)", "\\)");
+				parentString = parentString.replaceAll("\\|\\)", "\\)");
+				//Remove from Parents -> Leftovers (Part C; Empty Parentheses)
+				parentString = parentString.replaceAll("&\\(\\)", "");
+				parentString = parentString.replaceAll("\\|\\(\\)", "");
+				parentString = parentString.replaceAll("\\(\\)&", "");
+				parentString = parentString.replaceAll("\\(\\)\\|", "");
+				//Remove from Parents -> Leftovers (Part D; First and/or Last Character Is Symbol)
+				char firstChar = parentString.charAt(0);
+				char lastChar = parentString.charAt( parentString.length() - 1 );
+				String middleChars = "";
+				int currentChar = 0;
+				while (true)
+				{
+					//End of String; Break
+					if ( parentString.length() == (currentChar + 1) )
+						break;
+					char tempC = parentString.charAt(currentChar);
+					if (currentChar != 0)
+						middleChars = (middleChars + tempC);
+					currentChar++;
+				}
+				if ( (firstChar == '|') || (firstChar == '&') )
+				{
+					if ( (lastChar == '|') || (lastChar == '&') )	//Remove Both
+						parentString = middleChars;
+					else	//Remove First Only
+						parentString = (middleChars + lastChar);
+				}
+				else if ( (lastChar == '|') || (lastChar == '&') )	//Remove Last Only
+					parentString = (firstChar + middleChars);
+				current.setParents(parentString);
+			}
+		}
+		
+		//Remove Done Courses from neededCourses
+		Stack<Integer> indicesToRemove = new Stack<Integer>();
+		for (int i = 0; i < neededCourses.size(); i++)
+		{
+			Course current = neededCourses.get(i);
+			//Find if current Is in doneCourses
+			for (int j = 0; j < doneCourses.size(); j++)
+			{
+				Course curDone = doneCourses.get(j);
+				String nameA = curDone.getName();
+				String nameB = curDone.getCode();
+				String nameC = current.getName();
+				//Add to Deletion Queue
+				if ( (nameA.equals(nameC)) || (nameB.equals(nameC)) )
+					indicesToRemove.push(i);
+			}
+		}
+		//Remove Stuff in Deletion Queue
+		while ( !indicesToRemove.empty() )
+		{
+			int index = indicesToRemove.pop();
+			neededCourses.remove(index);
+		}
+		
+		//Algorithm
+		RunAlgorithm runAlg = new RunAlgorithm();
+		Course [] orderedList = runAlg.runAlgorithm(neededCourses);
+		
+		//Swap Name and Code (Again)
+		for (int i = 0; i < orderedList.length; i++)
+		{
+			String tempName = orderedList[i].getName();
+			orderedList[i].setName( orderedList[i].getCode() );
+			orderedList[i].setCode(tempName);
+		}
+		
+		//Semesterly Order
+		List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//GUI Interaction
+		for (int i = 0; i < orderedSemesters.size(); i++)
+		{
+			//Make Similar Semester Box
+			VBox semester = new VBox(10);
+			semester.setAlignment(Pos.CENTER);
+			String semNum = ( "Semester #" + (i + 1) );
+			Label semLabel = new Label(semNum);
+			semLabel.setStyle("-fx-font-size:14");
+			semester.getChildren().add(semLabel);
+			//Algorithmic Part
+			List<Course> tempS = orderedSemesters.get(i).getSemester();
+			for (int j = 0; j < tempS.size(); j++)
+			{
+				Course tempC = tempS.get(j);
+				//Add Course to Semester
+				String courseName = tempC.getName();
+				String courseFullName = tempC.getFullName();
+				int credits = tempC.getCredits();
+				String totalName = ( (j + 1) + ") " + courseName + " (" + credits
+						+ " Credits): " + courseFullName);
+				Label courseLabel = new Label(totalName);
+				courseLabel.setStyle("-fx-font-size:12");
+				semester.getChildren().add(courseLabel);
+			}
+			//Create Line
+			VBox line = new VBox();
+			line.setAlignment(Pos.CENTER);
+			Label lineSeg = new Label("|");
+			line.getChildren().add(lineSeg);
+			//Add Line and Semester to Total
+			semesters.getChildren().add(semester);
+			semesters.getChildren().add(line);
+		}
+		
+		//Combine GUIs
+		buttons.getChildren().add(backButton);
+		buttons.getChildren().add(homeButton);
+		fullGUI.getChildren().add(semesters);
+		fullGUI.getChildren().add(buttons);
+		gp.add(fullGUI, 0, 0);	//Column, Row
+		
+		//Center Buttons, etc.
+		ColumnConstraints colCon = new ColumnConstraints();
+		colCon.setHalignment(HPos.CENTER);
+		gp.getColumnConstraints().add(colCon);
+		
+		//Set Window Size and Scene
+		stage.setMaximized(true);
+		Scene scene = new Scene(gp);	//Copy of Panel; Required
+		
+		//Event Handlers for Buttons
+		//Back Button
+		EventHandler<ActionEvent> backBtnPressed = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent backBtn) {
+				cs.checkListGUI(courseList, profile, stage, cs);
+			}
+		};
+		backButton.setOnAction(backBtnPressed);	//Associates the Button
+		//Home Button
+		EventHandler<ActionEvent> homeBtnPressed = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent homeBtn) {
+				cs.profileGUI(stage, cs);
+			}
+		};
+		homeButton.setOnAction(homeBtnPressed);	//Associates the Button
+		
+		//Show Scene; Required
+		stage.setScene(scene);
+		stage.show();
     }
     
     public static void main(String[] args) throws Exception {
