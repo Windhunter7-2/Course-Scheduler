@@ -707,6 +707,7 @@ public class CourseScheduler extends Application {
 			try {
 				cs.checkListGUI(courseList, profile, stage, cs);
 			} catch (SQLException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -898,6 +899,7 @@ public class CourseScheduler extends Application {
 				try {
 					cs.checkListGUI(courseList, profile, stage, cs);
 				} catch (SQLException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
