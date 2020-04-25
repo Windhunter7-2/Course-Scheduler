@@ -643,9 +643,13 @@ public class CourseScheduler extends Application {
      * @param stage The stage on which to display this GUI
      * @param cs the instance of CourseScheduler calling this method.
      */
-    public void generateSchedule(List<Course> courseList, List<Course> neededCourses, List<Course> doneCourses,
+    public void generateSchedule(List<Course> courseList, List<Course> orig_neededCourses, List<Course> orig_doneCourses,
     		int maxCredits, int maxSemesters, Profile profile, Stage stage, CourseScheduler cs)
     {
+		//Clone Lists
+		List<Course> neededCourses = new ArrayList<Course>(orig_neededCourses);
+		List<Course> doneCourses = new ArrayList<Course>(orig_doneCourses);
+
 		//Null Fix
 		if (neededCourses == null)
 			neededCourses = new ArrayList<Course>();

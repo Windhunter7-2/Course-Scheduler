@@ -1,4 +1,4 @@
-(A or B) and (C or D)
-(A or B) and (C or D)
-(A or B) and (C or D)
-(A or B) and (C or D)
+()A or 
+()A or 
+()A or 
+()A
