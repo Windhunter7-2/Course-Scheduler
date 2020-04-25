@@ -55,8 +55,7 @@ public class CourseScheduler extends Application {
         if (scraper.needsToRun()) {
             scraperGUI(primaryStage, this);
         } else {
-		generateSchedule(null, null, null, 0, 0, null, primaryStage, this);
-//            profileGUI(primaryStage, this);
+            profileGUI(primaryStage, this);
         }
     }
     
