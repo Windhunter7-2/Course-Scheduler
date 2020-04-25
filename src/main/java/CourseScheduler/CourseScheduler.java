@@ -653,32 +653,6 @@ public class CourseScheduler extends Application {
 		if (doneCourses == null)
 			doneCourses = new ArrayList<Course>();
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		//TEST CASE (FOR INDIVIDUAL TESTING) -> DELETE AFTER TEST!!!
-		//NOTE: <ALREADY> TESTED REMOVAL OF DONE, AND WORKS!!!
-		maxCredits = 5;
-		maxSemesters = 100;
-		RunAlgorithm forTesting = new RunAlgorithm();
-		neededCourses = forTesting.testListOfCourses();
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		//GUI Initialization
 		Button backButton = new Button("Back");
 		backButton.setPrefSize(150, 60);	//Size of Button
@@ -824,19 +798,6 @@ public class CourseScheduler extends Application {
 		
 		//Semesterly Order
 		List<Semester> orderedSemesters = cutOffCalc(orderedList, maxCredits, maxSemesters);
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		//GUI Interaction
 		for (int i = 0; i < orderedSemesters.size(); i++)
