@@ -35,6 +35,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 
 public class CourseScheduler extends Application {
@@ -646,15 +647,10 @@ public class CourseScheduler extends Application {
     public void generateSchedule(List<Course> courseList, List<Course> orig_neededCourses, List<Course> orig_doneCourses,
     		int maxCredits, int maxSemesters, Profile profile, Stage stage, CourseScheduler cs)
     {
+    
 		//Clone Lists
-		List<Course> neededCourses = new ArrayList<Course>(orig_neededCourses);
-		List<Course> doneCourses = new ArrayList<Course>(orig_doneCourses);
-
-		//Null Fix
-		if (neededCourses == null)
-			neededCourses = new ArrayList<Course>();
-		if (doneCourses == null)
-			doneCourses = new ArrayList<Course>();
+		List<Course> neededCourses = orig_neededCourses.stream().map(Course::new).collect(Collectors.toList());
+		List<Course> doneCourses = orig_doneCourses.stream().map(Course::new).collect(Collectors.toList());
 		
 		//GUI Initialization
 		Button backButton = new Button("Back");
