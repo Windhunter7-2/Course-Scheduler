@@ -381,6 +381,8 @@ public class RunAlgorithm {
 		for (int i = 0; i < converter.originalString.size(); i++) {
 			String name = converter.originalString.get(i);
 			int indexChild = courseToIndex(name);
+			if (indexChild == -1)
+				continue;
 			int oldChildFlag = adjacencyList[indexChild].getFlag();
 			int newChildFlag = (oldChildFlag + (orNumbers[i] * 10));
 			adjacencyList[indexChild].setFlag(newChildFlag);
