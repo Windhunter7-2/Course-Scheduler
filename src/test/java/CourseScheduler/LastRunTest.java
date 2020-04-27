@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
-public class JackTests {
+public class LastRunTest {
 
     @Test
     public void testGetLastRun() throws IOException {
