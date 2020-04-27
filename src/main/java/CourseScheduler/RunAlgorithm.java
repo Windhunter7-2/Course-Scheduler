@@ -381,8 +381,16 @@ public class RunAlgorithm {
 		for (int i = 0; i < converter.originalString.size(); i++) {
 			String name = converter.originalString.get(i);
 			int indexChild = courseToIndex(name);
+			//If Nonexistent, Remove
 			if (indexChild == -1)
+			{
+				for (int j = 0; j < adjacencyList[index].getPrerequisites().size(); j++)
+				{
+					if ( name.equals(adjacencyList[index].getPrerequisites.get(j).getName()) )
+						adjacencyList[index].getPrerequisites.remove(j);
+				}
 				continue;
+			}
 			int oldChildFlag = adjacencyList[indexChild].getFlag();
 			int newChildFlag = (oldChildFlag + (orNumbers[i] * 10));
 			adjacencyList[indexChild].setFlag(newChildFlag);
