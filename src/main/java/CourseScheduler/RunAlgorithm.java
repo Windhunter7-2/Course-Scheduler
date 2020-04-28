@@ -386,8 +386,8 @@ public class RunAlgorithm {
 			{
 				for (int j = 0; j < adjacencyList[index].getPrerequisites().size(); j++)
 				{
-					if ( name.equals(adjacencyList[index].getPrerequisites.get(j).getName()) )
-						adjacencyList[index].getPrerequisites.remove(j);
+					if ( name.equals(adjacencyList[index].getPrerequisites().get(j)) )
+						adjacencyList[index].getPrerequisites().remove(j);
 				}
 				continue;
 			}
