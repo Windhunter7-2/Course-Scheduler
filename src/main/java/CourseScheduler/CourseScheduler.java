@@ -637,7 +637,7 @@ public class CourseScheduler extends Application {
      * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
      * @param courseList The list of all Courses
      * @param orig_doneCourses The list of needed Courses for the user to take
-     * @param orig_neededCourses The list of Courses the user has already done
+     * @param orig_neededCourses The l		//Clone Listsist of Courses the user has already done
      * @param maxCredits The maximum number of credits per semester
      * @param maxSemesters The maximum number of semesters
      * @param profile The user's profile
@@ -648,7 +648,6 @@ public class CourseScheduler extends Application {
     		int maxCredits, int maxSemesters, Profile profile, Stage stage, CourseScheduler cs)
     {
     
-		//Clone Lists
 		List<Course> neededCourses = orig_neededCourses.stream().map(Course::new).collect(Collectors.toList());
 		List<Course> doneCourses = orig_doneCourses.stream().map(Course::new).collect(Collectors.toList());
 		
@@ -684,7 +683,17 @@ public class CourseScheduler extends Application {
 				e.printStackTrace();
 			}
 		}
-		
+
+		//Treat all unselected prerequisites as done
+        for (int i = 0; i < neededCourses.size(); i++) {
+            for(int j = 0; j < neededCourses.get(i).getPrerequisites().size(); j++) {
+                if(!doneCourses.contains(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)))
+                        || !neededCourses.contains(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)))) {
+                    doneCourses.add(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)));
+                }
+            }
+        }
+
 		//Swap Name and Code
 		for (int i = 0; i < neededCourses.size(); i++)
 		{
@@ -692,15 +701,6 @@ public class CourseScheduler extends Application {
 			neededCourses.get(i).setName( neededCourses.get(i).getCode() );
 			neededCourses.get(i).setCode(tempName);
 		}
-
-        for (int i = 0; i < neededCourses.size(); i++) {
-            for(int j = 0; j < neededCourses.get(i).getPrerequisites().size(); j++) {
-                if(!doneCourses.contains(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)))
-                 || !neededCourses.contains(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)))) {
-                    doneCourses.add(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)));
-                }
-            }
-        }
 
 		//Remove Done Courses from Prerequisites and Parents
 		for (int i = 0; i < neededCourses.size(); i++)
