@@ -636,8 +636,8 @@ public class CourseScheduler extends Application {
      * the "Back" button to go back to the previous step of the checklist (selectProfileInit()), or the "Home"
      * button to return to the initial program startup, with the main GUI of Profile selection (guiDisplay()).
      * @param courseList The list of all Courses
-     * @param neededCourses The list of needed Courses for the user to take
-     * @param doneCourses The list of Courses the user has already done
+     * @param orig_doneCourses The list of needed Courses for the user to take
+     * @param orig_neededCourses The list of Courses the user has already done
      * @param maxCredits The maximum number of credits per semester
      * @param maxSemesters The maximum number of semesters
      * @param profile The user's profile
@@ -692,7 +692,16 @@ public class CourseScheduler extends Application {
 			neededCourses.get(i).setName( neededCourses.get(i).getCode() );
 			neededCourses.get(i).setCode(tempName);
 		}
-		
+
+        for (int i = 0; i < neededCourses.size(); i++) {
+            for(int j = 0; j < neededCourses.get(i).getPrerequisites().size(); j++) {
+                if(!doneCourses.contains(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)))
+                 || !neededCourses.contains(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)))) {
+                    doneCourses.add(getCourseByCode(courseList, neededCourses.get(i).getPrerequisites().get(j)));
+                }
+            }
+        }
+
 		//Remove Done Courses from Prerequisites and Parents
 		for (int i = 0; i < neededCourses.size(); i++)
 		{
